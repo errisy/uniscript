@@ -1,4 +1,6 @@
 {
   "name": "jack",
-  "language": "typescript"
+  "language": "typescript",
+  "job": "@{team.members.name2}",
+  "temperature": @{temperature}
 }

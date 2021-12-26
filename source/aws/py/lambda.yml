@@ -36,3 +36,6 @@ script:
       url: '@{baseUrl}/lambda_entry_test.py'
       toFile: '@{project}/lambda_entry_test.py'
       toFormat: True
+  - name: npm install
+    cmd: npm i
+    bash: npm i

@@ -39,3 +39,9 @@ script:
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = $['__command_output__'];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization @{azureDevOpsOrganization} --project @{azureDevOpsProject}

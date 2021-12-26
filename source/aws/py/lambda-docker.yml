@@ -42,3 +42,6 @@ script:
       url: '@{baseUrl}/lambda.dockerfile'
       toFile: '@{project}/lambda.dockerfile'
       toFormat: True
+  - name: npm install
+    cmd: cd @{project} && npm i && cd ..
+    bash: cd @{project} ; npm i ; cd ..

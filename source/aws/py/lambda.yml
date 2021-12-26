@@ -37,5 +37,5 @@ script:
       toFile: '@{project}/lambda_entry_test.py'
       toFormat: True
   - name: npm install
-    cmd: npm i
-    bash: npm i
+    cmd: cd @{project} && npm i && cd ..
+    bash: cd @{project} ; npm i ; cd ..

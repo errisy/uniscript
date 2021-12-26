@@ -1,8 +1,10 @@
 script:
   parameters:
     applicationName$@: '@{arg0}'
-    awsAccountId$@: '@{arg1}'
-    awsRegion$@: '@{arg2}'
-    azureDevOpsOrganization$@: '@{arg3}'
-    azureDevOpsProject$@: '@{arg4}'
-    azureDevOpsRepository$@: '@{arg5}'
+    awsAccountId$@: '@{arg1}' # The 12 Digits AWS Account Id
+    awsRegion$@: '@{arg2}' # The AWS region, such as 'us-west-1'
+    # You can find the following 3 in the Azure DevOps URL
+    # https://dev.azure.com/[organization]/_git/[project/repository]
+    azureDevOpsOrganization$@: '@{arg3}' # The Azure Organization Name
+    azureDevOpsProject$@: '@{arg4}' # The Azure Project Name
+    azureDevOpsRepository$@: '@{arg5}' # The Azure Repository Name

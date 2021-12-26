@@ -17,10 +17,10 @@ Initialize AWS + Azure DevOps:
 ```bash
 us aws/az-dev
 ```
-Modify the 'az-dev-env.yml'
-Setup the project:
+Modify the 'az-dev-env.yml'.
+Then setup the project:
 ```bash
-us aws/az-init
+us aws/az-setup
 ```
 ## AWS Lambda
 ### Create Python Project

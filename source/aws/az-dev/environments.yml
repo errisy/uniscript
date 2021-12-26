@@ -1,0 +1,28 @@
+# define the variables that will be shared across all pipelines
+# use following syntax to import
+# variables
+# - template: /environments.yml
+
+variables:
+  # shared variables:
+  Application: '@{applicationName}'
+  Version: 1.0.0
+  LambdaRuntimeDotNetCore: dotnetcore3.1
+  LambdaRuntimeNodeJS: nodejs12.x
+  LambdaRuntimePython: python3.8
+  
+  # conditional variables:
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/') }}:
+    EnvironmentTarget: dev
+    AWSAccountId: '@{awsAccountId}'
+    AWSRegion: ${awsRegion}
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    EnvironmentTarget: staging
+    AWSAccountId: '@{awsAccountId}'
+    AWSRegion: ${awsRegion}
+
+  # create 
+  # ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/prod/@{awsAccountId}-@{awsRegion}') }}:
+  #   EnvironmentTarget: prod
+  #   AWSAccountId: @{awsAccountId}
+  #   AWSRegion: @{awsRegion}

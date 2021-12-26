@@ -1,0 +1,5 @@
+script:
+  parameters:
+    awsAccountId$@: '@{awsAccountId}'
+    awsRegion$@: '@{awsRegion}'
+    environmentTarget$@: stagging

@@ -10,23 +10,23 @@ script:
     web:
       method: get
       url: '@{baseUrl}/lambda_entry.py'
-      toFile: lambda_entry.py
+      toFile: '@{project}/lambda_entry.py'
       toFormat: True
   - name: Download pipeline.yml
     web:
       method: get
       url: '@{baseUrl}/pipeline.yml'
-      toFile: pipeline.yml
+      toFile: '@{project}/pipeline.yml'
       toFormat: True
   - name: Download cloudformation.yml
     web:
       method: get
       url: '@{baseUrl}/cloudformation.yml'
-      toFile: cloudformation.yml
+      toFile: '@{project}/cloudformation.yml'
       toFormat: False
   - name: Download package.json
     web:
       method: get
       url: '@{baseUrl}/package.json'
-      toFile: package.json
+      toFile: '@{project}/package.json'
       toFormat: True

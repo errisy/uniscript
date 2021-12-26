@@ -50,4 +50,4 @@ script:
     post: |
       $['gitBranchName'] = $['__command_output__'];
   - name: create pipeline
-    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization @{azureDevOpsOrganization} --project @{azureDevOpsProject}
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}

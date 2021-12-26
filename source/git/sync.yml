@@ -1,6 +1,7 @@
 script:
   parameters:
     inputMessage$: '@{arg0}'
+    
   steps:
   - name: git sync
     pre: |

@@ -1,0 +1,53 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda-docker
+    project$@: '@{arg0}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: Download lambda_entry.ts
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry.ts'
+      toFile: '@{project}/lambda_entry.ts'
+      toFormat: True
+  - name: Download pipeline.yml
+    web:
+      method: get
+      url: '@{baseUrl}/pipeline.yml'
+      toFile: '@{project}/pipeline.yml'
+      toFormat: True
+  - name: Download cloudformation.yml
+    web:
+      method: get
+      url: '@{baseUrl}/cloudformation.yml'
+      toFile: '@{project}/cloudformation.yml'
+      toFormat: False
+  - name: Download package.json
+    web:
+      method: get
+      url: '@{baseUrl}/package.json'
+      toFile: '@{project}/package.json'
+      toFormat: True
+  - name: Download lambda_entry_test.ts
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry_test.ts'
+      toFile: '@{project}/lambda_entry_test.ts'
+      toFormat: True
+  - name: Download lambda.dockerfile
+    web:
+      method: get
+      url: '@{baseUrl}/lambda.dockerfile'
+      toFile: '@{project}/lambda.dockerfile'
+      toFormat: True
+  - name: npm install
+    cmd: cd @{project} && npm i && cd ..
+    bash: cd @{project} ; npm i ; cd ..
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = $['__command_output__'];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}

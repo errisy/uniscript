@@ -1,7 +1,7 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory

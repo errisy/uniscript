@@ -39,9 +39,13 @@ script:
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
   - name: branch name
     cmd: git branch --show-current
     post: |
       $['gitBranchName'] = $['__command_output__'];
   - name: create pipeline
     cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

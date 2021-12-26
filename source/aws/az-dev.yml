@@ -3,11 +3,9 @@ script:
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-dev
     applicationFullName$@: '@{arg0}'
   steps:
-  - name: Make The Project Directory
-    mkdir: '@{applicationFullName}'
   - name: Download Web
     web:
       method: get
       url: '@{baseUrl}/az-dev-env.yml'
-      toFile: '@{applicationFullName}/az-dev-env.yml'
+      toFile: az-dev-env.yml
       toFormat: True

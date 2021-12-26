@@ -1,0 +1,14 @@
+script:
+  parameters:
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda
+    project$@: '@{arg0}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: Download Web
+    web:
+      method: get
+      url: '@{baseUrl}/sample.json'
+      toType: json
+      toFile: working/web-result.jsonc
+      toFormat: True

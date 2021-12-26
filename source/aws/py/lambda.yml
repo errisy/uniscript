@@ -1,7 +1,32 @@
 script:
   parameters:
+    AzDevEnv+: az-dev-env.yml
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
+  - name: Download lambda_entry.py
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry.py'
+      toFile: lambda_entry.py
+      toFormat: True
+  - name: Download pipeline.yml
+    web:
+      method: get
+      url: '@{baseUrl}/pipeline.yml'
+      toFile: pipeline.yml
+      toFormat: True
+  - name: Download cloudformation.yml
+    web:
+      method: get
+      url: '@{baseUrl}/cloudformation.yml'
+      toFile: cloudformation.yml
+      toFormat: False
+  - name: Download package.json
+    web:
+      method: get
+      url: '@{baseUrl}/package.json'
+      toFile: package.json
+      toFormat: True

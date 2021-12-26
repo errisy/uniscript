@@ -5,6 +5,6 @@ script:
   steps:
   - name: git sync
     pre: |
-      $['message'] = $['inputMessage'] || 'Unnamed Commit';
+      $['message'] = $['arg0'] || 'Unnamed Commit';
     cmd: git add -A && git commit -a -m "@{message}" && git pull && git push
     ignoreError: True

@@ -1,4 +1,6 @@
 script:
+  parameters:
+    project$: '@{arg0}'
   steps:
   - name: Make Directory
-    mkdir: '@{arg0}'
+    mkdir: '@{project}'

@@ -28,27 +28,27 @@ us aws/az-init
 us aws/py/lambda [project-name]
 ```
 
-## Create Python Docker Project
+### Create Python Docker Project
 ```bash
 us aws/py/lambda-docker [project-name]
 ```
 
-## Create TypeScript Project
+### Create TypeScript Project
 ```bash
 us aws/ts/lambda [project-name]
 ```
 
-## Create TypeScript Docker Project
+### Create TypeScript Docker Project
 ```bash
 us aws/ts/lambda-docker [project-name]
 ```
 
-## Create C# Project
+### Create C# Project
 ```bash
 us aws/cs/lambda [project-name]
 ```
 
-## Create C# Docker Project
+### Create C# Docker Project
 ```bash
 us aws/cs/lambda-docker [project-name]
 ```

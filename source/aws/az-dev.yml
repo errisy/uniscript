@@ -1,7 +1,7 @@
 script:
   parameters:
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-dev
-    applicationFullName: '@{arg0}'
+    applicationFullName$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{applicationFullName}'

@@ -1,7 +1,7 @@
 script:
   parameters:
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda
-    project$: '@{arg0}'
+    project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'

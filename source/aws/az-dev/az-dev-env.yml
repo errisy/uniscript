@@ -4,5 +4,5 @@ script:
     awsAccountId$@: '@{arg1}'
     awsRegion$@: '@{arg2}'
     azureDevOpsOrganization$@: '@{arg3}'
-    azureDevOpsProject$: '@{arg4}'
-    azureDevOpsRepository$: '@{arg5}'
+    azureDevOpsProject$@: '@{arg4}'
+    azureDevOpsRepository$@: '@{arg5}'

@@ -11,8 +11,12 @@ npm install -g uniscript
 ```
 
 # AWS + Azure DevOps
-Initialize AWS + Azure DevOps
+Initialize AWS + Azure DevOps:
 ```bash
 us aws/az-dev
 ```
-Modify the az-dev-env.yml
+Modify the 'az-dev-env.yml'
+Setup the project:
+```bash
+us aws/az-init
+```

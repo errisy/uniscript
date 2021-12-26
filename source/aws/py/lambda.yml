@@ -1,0 +1,4 @@
+script:
+  steps:
+  - name: Make Directory
+    mkdir: '@{arg0}'

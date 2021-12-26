@@ -1,14 +1,44 @@
 script:
   parameters:
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda-docker
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
-  - name: Download Web
+  - name: Download lambda_entry.py
     web:
       method: get
-      url: '@{baseUrl}/sample.json'
-      toType: json
-      toFile: working/web-result.jsonc
+      url: '@{baseUrl}/lambda_entry.py'
+      toFile: '@{project}/lambda_entry.py'
+      toFormat: True
+  - name: Download pipeline.yml
+    web:
+      method: get
+      url: '@{baseUrl}/pipeline.yml'
+      toFile: '@{project}/pipeline.yml'
+      toFormat: True
+  - name: Download cloudformation.yml
+    web:
+      method: get
+      url: '@{baseUrl}/cloudformation.yml'
+      toFile: '@{project}/cloudformation.yml'
+      toFormat: False
+  - name: Download package.json
+    web:
+      method: get
+      url: '@{baseUrl}/package.json'
+      toFile: '@{project}/package.json'
+      toFormat: True
+  - name: Download lambda_entry_test.py
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry_test.py'
+      toFile: '@{project}/lambda_entry_test.py'
+      toFormat: True
+  - name: Download lambda.dockerfile
+    web:
+      method: get
+      url: '@{baseUrl}/lambda.dockerfile'
+      toFile: '@{project}/lambda.dockerfile'
       toFormat: True

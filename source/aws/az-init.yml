@@ -2,7 +2,6 @@ script:
   parameters:
     AzDevEnv+: az-dev-env.yml
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-dev
-    applicationFullName$@: '@{applicationName}'
   steps:
   - name: Download environments.yml
     web:

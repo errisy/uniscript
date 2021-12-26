@@ -11,6 +11,8 @@ npm install -g uniscript
 ```
 
 # AWS + Azure DevOps
+Use Amazon Web Service with Azure DevOps for CI/CD.
+You need to install [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) with the [devops extension](https://docs.microsoft.com/en-us/azure/devops/cli/?view=azure-devops).
 Initialize AWS + Azure DevOps:
 ```bash
 us aws/az-dev

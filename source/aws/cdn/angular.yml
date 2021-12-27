@@ -1,0 +1,30 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cdn/angular
+    project$@: '@{arg0}'
+  steps:
+  - name: create angular project
+    cmd: 'ng new @{project} --routing=true --style=scss --strict=true'
+  - name: Download pipeline.yml
+    web:
+      method: get
+      url: '@{baseUrl}/pipeline.yml'
+      toFile: '@{project}/pipeline.yml'
+      toFormat: True
+  - name: Download cloudformation.yml
+    web:
+      method: get
+      url: '@{baseUrl}/cloudformation.yml'
+      toFile: '@{project}/cloudformation.yml'
+      toFormat: False
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

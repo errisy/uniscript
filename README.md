@@ -65,7 +65,7 @@ us aws/cs/lambda-docker [project-name]
 ```
 
 ## AWS CloudFront
+### Angular
 ```bash
-# Angular
 us aws/cdn/angular [project-name]
 ```

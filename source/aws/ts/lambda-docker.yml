@@ -30,11 +30,17 @@ script:
       url: '@{baseUrl}/package.json'
       toFile: '@{project}/package.json'
       toFormat: True
-  - name: Download lambda_entry_test.ts
+  - name: Download tsconfig.json
     web:
       method: get
-      url: '@{baseUrl}/lambda_entry_test.ts'
-      toFile: '@{project}/lambda_entry_test.ts'
+      url: '@{baseUrl}/tsconfig.json'
+      toFile: '@{project}/tsconfig.json'
+      toFormat: False
+  - name: Download lambda_entry.test.ts
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry.test.ts'
+      toFile: '@{project}/lambda_entry.test.ts'
       toFormat: True
   - name: Download lambda.dockerfile
     web:
@@ -42,12 +48,35 @@ script:
       url: '@{baseUrl}/lambda.dockerfile'
       toFile: '@{project}/lambda.dockerfile'
       toFormat: True
+  - name: Download .dockerignore
+    web:
+      method: get
+      url: '@{baseUrl}/.dockerignore'
+      toFile: '@{project}/.dockerignore'
+      toFormat: False
+  - name: Download docker-build.cmd
+    web:
+      method: get
+      url: '@{baseUrl}/docker-build.cmd'
+      toFile: '@{project}/docker-build.cmd'
+      toFormat: True
+  - name: Download docker-build.sh
+    web:
+      method: get
+      url: '@{baseUrl}/docker-build.sh'
+      toFile: '@{project}/docker-build.sh'
+      toFormat: True
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..
+    ignoreError: True
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
   - name: branch name
     cmd: git branch --show-current
     post: |
-      $['gitBranchName'] = $['__command_output__'];
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
   - name: create pipeline
     cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

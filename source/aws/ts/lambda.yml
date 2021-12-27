@@ -30,11 +30,17 @@ script:
       url: '@{baseUrl}/package.json'
       toFile: '@{project}/package.json'
       toFormat: True
-  - name: Download lambda_entry_test.py
+  - name: Download tsconfig.json
     web:
       method: get
-      url: '@{baseUrl}/lambda_entry_test.py'
-      toFile: '@{project}/lambda_entry_test.py'
+      url: '@{baseUrl}/tsconfig.json'
+      toFile: '@{project}/tsconfig.json'
+      toFormat: False
+  - name: Download lambda_entry.test.ts
+    web:
+      method: get
+      url: '@{baseUrl}/lambda_entry.test.ts'
+      toFile: '@{project}/lambda_entry.test.ts'
       toFormat: True
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
@@ -45,7 +51,7 @@ script:
   - name: branch name
     cmd: git branch --show-current
     post: |
-      $['gitBranchName'] = $['__command_output__'];
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
   - name: create pipeline
     cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
     ignoreError: True

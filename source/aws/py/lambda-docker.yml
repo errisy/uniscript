@@ -42,6 +42,24 @@ script:
       url: '@{baseUrl}/lambda.dockerfile'
       toFile: '@{project}/lambda.dockerfile'
       toFormat: True
+  - name: Download .dockerignore
+    web:
+      method: get
+      url: '@{baseUrl}/.dockerignore'
+      toFile: '@{project}/.dockerignore'
+      toFormat: False
+  - name: Download docker-build.cmd
+    web:
+      method: get
+      url: '@{baseUrl}/docker-build.cmd'
+      toFile: '@{project}/docker-build.cmd'
+      toFormat: True
+  - name: Download docker-build.sh
+    web:
+      method: get
+      url: '@{baseUrl}/docker-build.sh'
+      toFile: '@{project}/docker-build.sh'
+      toFormat: True
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

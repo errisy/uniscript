@@ -1,0 +1,14 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-dev
+    project$@: '@{arg0}'
+  steps:
+  - name: get pipeline id
+    cmd: az pipelines show --name @{project} --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    post: |
+      $['pipelineId'] = JSON.parse($['__command_output__'])['id'];
+    ignoreError: True
+  - name: delete pipeline
+    cmd: az pipelines delete --id @{pipelineId} --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject} --yes
+    ignoreError: True

@@ -45,7 +45,7 @@ script:
   - name: branch name
     cmd: git branch --show-current
     post: |
-      $['gitBranchName'] = $['__command_output__'];
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
   - name: create pipeline
     cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
     ignoreError: True

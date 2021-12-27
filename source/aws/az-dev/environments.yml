@@ -24,5 +24,5 @@ variables:
   # create 
   # ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/prod/@{awsAccountId}-@{awsRegion}') }}:
   #   EnvironmentTarget: prod
-  #   AWSAccountId: @{awsAccountId}
-  #   AWSRegion: @{awsRegion}
+  #   AWSAccountId: '@{awsAccountId}'
+  #   AWSRegion: '@{awsRegion}'

@@ -1,0 +1,90 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cs/lambda
+    project$@: '@{arg0}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: Download LambdaEntry.sln
+    web:
+      method: get
+      url: '@{baseUrl}/LambdaEntry.sln'
+      toFile: '@{project}/LambdaEntry.sln'
+      toFormat: False
+  - name: Download LambdaEntry.csproj
+    web:
+      method: get
+      url: '@{baseUrl}/LambdaEntry.csproj'
+      toFile: '@{project}/LambdaEntry.csproj'
+      toFormat: False
+  - name: Download LambdaEntry.Tests.csproj
+    web:
+      method: get
+      url: '@{baseUrl}/LambdaEntry.Tests.csproj'
+      toFile: '@{project}/LambdaEntry.Tests.csproj'
+      toFormat: False
+  - name: Download Function.cs
+    web:
+      method: get
+      url: '@{baseUrl}/Function.cs'
+      toFile: '@{project}/Function.cs'
+      toFormat: True
+  - name: Download FunctionTest.cs
+    web:
+      method: get
+      url: '@{baseUrl}/FunctionTest.cs'
+      toFile: '@{project}/FunctionTest.cs'
+      toFormat: True
+  - name: Download Properties/launchSettings.json
+    web:
+      method: get
+      url: '@{baseUrl}/Properties/launchSettings.json'
+      toFile: '@{project}/Properties/launchSettings.json'
+      toFormat: False
+  - name: Download pipeline.yml
+    web:
+      method: get
+      url: '@{baseUrl}/pipeline.yml'
+      toFile: '@{project}/pipeline.yml'
+      toFormat: True
+  - name: Download cloudformation.yml
+    web:
+      method: get
+      url: '@{baseUrl}/cloudformation.yml'
+      toFile: '@{project}/cloudformation.yml'
+      toFormat: False
+  - name: Download build.cmd
+    web:
+      method: get
+      url: '@{baseUrl}/build.cmd'
+      toFile: '@{project}/build.cmd'
+      toFormat: False
+  - name: Download build.sh
+    web:
+      method: get
+      url: '@{baseUrl}/build.sh'
+      toFile: '@{project}/build.sh'
+      toFormat: False
+  - name: Download test.cmd
+    web:
+      method: get
+      url: '@{baseUrl}/test.cmd'
+      toFile: '@{project}/test.cmd'
+      toFormat: False
+  - name: Download test.sh
+    web:
+      method: get
+      url: '@{baseUrl}/test.sh'
+      toFile: '@{project}/test.sh'
+      toFormat: False
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

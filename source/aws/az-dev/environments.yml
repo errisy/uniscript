@@ -15,11 +15,11 @@ variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/') }}:
     EnvironmentTarget: dev
     AWSAccountId: '@{awsAccountId}'
-    AWSRegion: ${awsRegion}
+    AWSRegion: '@{awsRegion}'
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     EnvironmentTarget: staging
     AWSAccountId: '@{awsAccountId}'
-    AWSRegion: ${awsRegion}
+    AWSRegion: '@{awsRegion}'
 
   # create 
   # ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/prod/@{awsAccountId}-@{awsRegion}') }}:

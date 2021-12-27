@@ -17,6 +17,22 @@ Parameters:
     Type: String
 
 Resources:
+  BatchComputeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -32,58 +48,24 @@ Resources:
       Path: /
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/AdministratorAccess
+      
   Lambda:
     Type: AWS::Lambda::Function
     Properties:
+      PackageType: Image
       Code:
-        S3Bucket: !Sub ${AWSAccountId}-${AWSRegion}-stacks
-        S3Key: !Sub ${Application}/${EnvironmentTarget}/${Version}/${Project}/${BuildId}/lambda.zip
+        ImageUri: !Sub ${AWSAccountId}.dkr.ecr.${AWSRegion}.amazonaws.com/${Application}-${Project}-${EnvironmentTarget}:${BuildId}
       FunctionName: !Sub ${Application}--${Project}--${EnvironmentTarget}
-      Handler: lambda_entry.handler
-      MemorySize: 512
+      MemorySize: 1024
       Role: !GetAtt LambdaRole.Arn
-      Runtime: !Sub ${Runtime}
       Timeout: 60
-    # Add Layers Here
-      # Layers:
-      #   - Fn::Transform:
-      #       Name : cloudformation-utils
-      #       Parameters:
-      #         InputString: !Sub 'ProjectLayer@${Application}--[project-name]--${AWSRegion}--${EnvironmentTarget}'
-      #         Operation: Stack
-    # Add Environment Variables here
-    #   Environment:
-    #     Variables:
-    #       VariableName: !Sub '${variable}-value'
+      # Environment:
+      #   Variables:
+      #     Key: Value
 
-  # if you want to schedule the lambda by timer
-  # LambdaRunnerRule:
-  #   Type: AWS::Events::Rule
-  #   Properties:
-  #     Description: 'Run the lambda at 00:00'
-  #     ScheduleExpression: 'cron(0 0 * * ? *)'
-  #     Name: !Sub '${Application}--${Project}--event-rule--${EnvironmentTarget}'
-  #     State: ENABLED
-  #     Targets:
-  #       - Arn: !GetAtt Lambda.Arn
-  #         Id: Invoke-Lambda
-  #         Input: !Sub |
-  #           { 
-  #             "name": "abc"
-  #           }
-
-  # PermissionToInvokeLambda: 
-  #   Type: AWS::Lambda::Permission
-  #   Properties: 
-  #     FunctionName: !Ref Lambda
-  #     Action: lambda:InvokeFunction
-  #     Principal: events.amazonaws.com
-  #     SourceArn: !GetAtt LambdaRunnerRule.Arn
-
-  # If you want ApiGateway (WebSocket) to send request to this lambda function
-  # ApiGatewayInvokePermission:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     Action: lambda:InvokeFunction
-  #     FunctionName: !Ref Lambda
-  #     Principal: apigateway.amazonaws.com
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref Lambda
+      Principal: apigateway.amazonaws.com

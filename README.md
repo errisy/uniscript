@@ -38,34 +38,29 @@ us aws/az-rm [project-name]
 ```bash
 us aws/py/lambda [project-name]
 ```
-
 ### Create Python Docker Project
 ```bash
 us aws/py/lambda-docker [project-name]
 ```
-
 ### Create TypeScript Project
 ```bash
 us aws/ts/lambda [project-name]
 ```
-
 ### Create TypeScript Docker Project
 ```bash
 us aws/ts/lambda-docker [project-name]
 ```
-
 ### Create C# Project
 ```bash
 us aws/cs/lambda [project-name]
 ```
-
 ### Create C# Docker Project
 ```bash
 us aws/cs/lambda-docker [project-name]
 ```
-
 ## AWS CloudFront
 ### Angular
+This requires [@angular/cli](https://www.npmjs.com/package/@angular/cli)
 ```bash
 us aws/cdn/angular [project-name]
 ```

@@ -22,6 +22,17 @@ Then setup the project:
 ```bash
 us aws/az-setup
 ```
+## Azure DevOps Operations
+### Run Pipeline
+Run the Azure DevOps pipeline for project:
+```bash
+us aws/az-run [project-name]
+```
+### Delete Pipeline
+Delete the Azure DevOps pipeline for project:
+```bash
+us aws/az-rm [project-name]
+```
 ## AWS Lambda
 ### Create Python Project
 ```bash

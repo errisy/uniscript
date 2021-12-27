@@ -18,12 +18,6 @@ script:
       url: '@{baseUrl}/LambdaEntry.csproj'
       toFile: '@{project}/LambdaEntry.csproj'
       toFormat: False
-  - name: Download LambdaEntry.Tests.csproj
-    web:
-      method: get
-      url: '@{baseUrl}/LambdaEntry.Tests.csproj'
-      toFile: '@{project}/LambdaEntry.Tests.csproj'
-      toFormat: False
   - name: Download Function.cs
     web:
       method: get
@@ -54,18 +48,6 @@ script:
       url: '@{baseUrl}/cloudformation.yml'
       toFile: '@{project}/cloudformation.yml'
       toFormat: False
-  - name: Download build.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/build.cmd'
-      toFile: '@{project}/build.cmd'
-      toFormat: False
-  - name: Download build.sh
-    web:
-      method: get
-      url: '@{baseUrl}/build.sh'
-      toFile: '@{project}/build.sh'
-      toFormat: False
   - name: Download test.cmd
     web:
       method: get
@@ -77,6 +59,18 @@ script:
       method: get
       url: '@{baseUrl}/test.sh'
       toFile: '@{project}/test.sh'
+      toFormat: False
+  - name: Download publish.cmd
+    web:
+      method: get
+      url: '@{baseUrl}/publish.cmd'
+      toFile: '@{project}/publish.cmd'
+      toFormat: False
+  - name: Download publish.sh
+    web:
+      method: get
+      url: '@{baseUrl}/publish.sh'
+      toFile: '@{project}/publish.sh'
       toFormat: False
   - name: git sync
     cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push

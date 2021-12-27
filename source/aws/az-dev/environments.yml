@@ -8,8 +8,8 @@ variables:
   Application: '@{applicationName}'
   Version: 1.0.0
   LambdaRuntimeDotNetCore: dotnetcore3.1
-  LambdaRuntimeNodeJS: nodejs12.x
-  LambdaRuntimePython: python3.8
+  LambdaRuntimeNodeJS: nodejs14.x
+  LambdaRuntimePython: python3.9
   
   # conditional variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/') }}:

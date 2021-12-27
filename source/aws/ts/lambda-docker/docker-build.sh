@@ -1,1 +1,1 @@
-docker build . -f lambda.dockerfile -t ts-lambda-docker-1:latest
+docker build . -f lambda.dockerfile -t @{project}:latest

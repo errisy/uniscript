@@ -1,4 +1,4 @@
-# this will download the lambda.zip from S3 and install it to target
+# Build Lambda Layer for Python
 trigger:
   branches:
     include:
@@ -13,7 +13,7 @@ trigger:
 # resources:
 #   pipelines:
 #     - pipeline: 'referred-pipeline'
-#       project: '${AzureDevOpsProject}'
+#       project: '${__PROJECTNAME__}/*'
 #       source: 'referred-pipeline'
 #       trigger:
 #         branches:
@@ -23,55 +23,52 @@ trigger:
 
 variables:
 - template: /environments.yml
+- name: tag
+  value: '$(Build.BuildId)'
 - name: project
   value: '@{project}'
 
 pool:
   vmImage: 'ubuntu-latest'
-
 steps:
+
+- task: Docker@2
+  displayName: Build Lamdba Container Image
+  inputs:
+    command: build
+    dockerfile: '$(project)/lambda.dockerfile'
+    repository: '$(Application)-$(project)-$(EnvironmentTarget)'
+    tags: $(tag)
+
+- task: ECRPushImage@1
+  displayName: Push Lambda Container Image to ECR
+  inputs:
+    awsCredentials: '$(AWSAccountId)'
+    regionName: '$(AWSRegion)'
+    imageSource: 'imagename'
+    sourceImageName: '$(Application)-$(project)-$(EnvironmentTarget)'
+    sourceImageTag: $(tag)
+    repositoryName: '$(Application)-$(project)-$(EnvironmentTarget)'
+    pushTag: $(tag)
+    autoCreateRepository: true
+
 - script: |
     rm -rf $(project)/dist
     mkdir $(project)/dist
-  displayName: Create dist directory
-- task: ArchiveFiles@2
-  displayName: Pack the files into zip package
-  inputs:
-    rootFolderOrFile: '$(project)/'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(project)/dist/source.zip'
-    replaceExistingArchive: true
-- script: |
     cp $(project)/cloudformation.yml $(project)/dist/
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'custom'
-    projects: '$(project)/LambdaEntry.csproj'
-    publishWebProjects: false
-    custom: 'publish'
-    arguments: '--output build --configuration Release'
-    workingDirectory: '$(project)'
-    modifyOutputPath: false
-    zipAfterPublish: false
-- task: ArchiveFiles@2
-  displayName: Pack the files into zip package
-  inputs:
-    rootFolderOrFile: '$(project)/build'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(project)/dist/lambda.zip'
-    replaceExistingArchive: true
+  displayName: Copy Zip File from Image Instance to to Local
+
 - task: S3Upload@1
-  displayName: Upload all files to stacks folder in S3
+  displayName: Upload Layzer File to Artifacts Bucket
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
     bucketName: '$(AWSAccountId)-$(AWSRegion)-stacks'
+    createBucket: true
     sourceFolder: '$(project)/dist'
     globExpressions: '**'
     targetFolder: '$(Application)/$(EnvironmentTarget)/$(Version)/$(project)/$(Build.BuildId)'
-    createBucket: true
+
 - task: LambdaInvokeFunction@1
   continueOnError: true
   displayName: Check the state of CloudFormation
@@ -85,6 +82,7 @@ steps:
         "query": "CloudFormationState"
       }
     outputVariable: 'ShouldDeleteStack'
+
 - task: CloudFormationDeleteStack@1
   continueOnError: true
   displayName: Delete the CloudFormation when necessary
@@ -93,6 +91,7 @@ steps:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
     stackName: '$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)'
+
 - task: CloudFormationCreateOrUpdateStack@1
   displayName: Run the CloudFormation Create/Update
   inputs:
@@ -111,9 +110,7 @@ steps:
         {"ParameterKey":"Version", "ParameterValue":"$(Version)"},
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
-        {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimeDotNetCore)"},
+        {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimePython)"},
         {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
       ]
     capabilityAutoExpand: true
-
-

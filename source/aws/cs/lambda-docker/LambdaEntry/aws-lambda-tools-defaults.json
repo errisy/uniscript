@@ -6,11 +6,11 @@
     "All the command line options for the Lambda command can be specified in this file."
   ],
   "profile": "dnt",
-  "region": "",
+  "region": "us-east-1",
   "configuration": "Release",
-  "framework": "netcoreapp3.1",
-  "function-runtime": "dotnetcore3.1",
+  "package-type": "image",
   "function-memory-size": 256,
   "function-timeout": 30,
-  "function-handler": "lambda_entry::lambda_entry.Function::FunctionHandler"
+  "image-command": "LambdaEntry::LambdaEntry.Function::FunctionHandler",
+  "docker-host-build-output-dir": "./bin/Release/lambda-publish"
 }

@@ -1,1 +1,0 @@
-dotnet build LambdaEntry.csproj

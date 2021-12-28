@@ -1,3 +1,5 @@
+# use the '../.env' environment variables for local debugging
+import use_env
 from absl.testing import absltest
 from lambda_entry import handler
 

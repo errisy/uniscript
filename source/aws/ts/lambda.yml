@@ -42,6 +42,12 @@ script:
       url: '@{baseUrl}/lambda_entry.test.ts'
       toFile: '@{project}/lambda_entry.test.ts'
       toFormat: True
+  - name: Download use_env.ts
+    web:
+      method: get
+      url: '@{baseUrl}/use_env.ts'
+      toFile: '@{project}/use_env.ts'
+      toFormat: True
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

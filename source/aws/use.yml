@@ -1,0 +1,34 @@
+script:
+  parameters:
+    arg0$: ''
+    arg1$: ''
+    AzDevEnv+: az-dev-env.yml
+    profile$@: '@{arg0}'
+    name$@: '@{arg1}'
+  steps:
+  - name: get aws region
+    cmd: 'aws configure get region --profile @{profile}'
+    post: $['awsRegion'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws access key id
+    cmd: 'aws configure get aws_access_key_id --profile @{profile}'
+    post: $['awsAccessKeyId'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws access secret key
+    cmd: 'aws configure get aws_secret_access_key --profile @{profile}'
+    post: $['awsAccessSecretKey'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws caller identity
+    cmd: 'aws sts get-caller-identity --profile @{profile} --region @{awsRegion} --output text'
+    post: $['awsAccessId'] = /^\s*(\d{12})/ig.exec($['__command_output__'])[1];
+  - name: print the environment variables in one string
+    log: 'AWS_ACCOUNT_ID=@{awsAccessId};AWS_REGION=@{awsRegion};AWS_DEFAULT_REGION=@{awsRegion};AWS_ACCESS_KEY_ID=@{awsAccessKeyId};AWS_SECRET_ACCESS_KEY=@{awsAccessSecretKey};'
+  - name: write to .env/@{name}.json
+    write:
+      content: |
+        {
+          "AWS_ACCOUNT_ID": "@{awsAccessId}",
+          "AWS_REGION": "@{awsRegion}",
+          "AWS_DEFAULT_REGION": "@{awsRegion}",
+          "AWS_ACCESS_KEY_ID": "@{awsAccessKeyId}",
+          "AWS_SECRET_ACCESS_KEY": "@{awsAccessSecretKey}"
+        }
+      format: True
+      file: '.env/@{name}.json'

@@ -1,3 +1,4 @@
+import './use_env';
 import {} from 'aws-sdk';
 
 interface IEvent{

@@ -9,7 +9,13 @@ Install UniScript to enable the "us" commandlet
 ```bash
 npm install -g uniscript
 ```
-
+To verify the installation, try print the version with either of the following commands:
+```bash
+us --version
+```
+```bash
+us -v
+```
 # AWS + Azure DevOps
 Use Amazon Web Service with Azure DevOps for CI/CD.
 You need to install [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) with the [devops extension](https://docs.microsoft.com/en-us/azure/devops/cli/?view=azure-devops).

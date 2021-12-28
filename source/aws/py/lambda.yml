@@ -36,6 +36,12 @@ script:
       url: '@{baseUrl}/lambda_entry_test.py'
       toFile: '@{project}/lambda_entry_test.py'
       toFormat: True
+  - name: Download use_env.py
+    web:
+      method: get
+      url: '@{baseUrl}/use_env.py'
+      toFile: '@{project}/use_env.py'
+      toFormat: True
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

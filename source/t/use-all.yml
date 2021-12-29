@@ -1,0 +1,12 @@
+script:
+  parameters:
+    arg0$: ''
+    arg1$: 'use-all-files.yml'
+    arg2$: 'True'
+    scanPath$@: '@{arg0}'
+    outputScriptFile$@: '@{arg1}'
+    defaultFormatting$@: '@{arg2}'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/t
+  steps:
+  - name: run use-all.ts
+    ts: '@{baseUrl}/use-all.ts'

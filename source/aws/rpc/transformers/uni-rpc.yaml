@@ -1,0 +1,7 @@
+rpc:
+# - cs: '../dotnetweb-dest'
+#   type: websocket-service
+# - ts: '../ts-emit-dest/src/app/'
+#   type: websocket-angular-client
+- ts: '../lambda-api/'
+  type: websocket-lambda-service

@@ -12,8 +12,13 @@ variables:
   LambdaRuntimePython: python3.9
   
   # this project is for the setup of AWS environments, only one setup is required
+  # in order to provide backward compatability, this setup supports both main and master
   # conditional variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    EnvironmentTarget: prod
+    AWSAccountId: '@{awsAccountId}' # the 12 degits AWS account Id.
+    AWSRegion: '@{awsRegion}' # the aws region
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     EnvironmentTarget: prod
     AWSAccountId: '@{awsAccountId}' # the 12 degits AWS account Id.
     AWSRegion: '@{awsRegion}' # the aws region

@@ -1,0 +1,26 @@
+script:
+  parameters:
+    arg0$: ''
+    arg1$: 'use-all-files.yml'
+    arg2$: 'True'
+    scanPath$@: '@{arg0}'
+    outputScriptFile$@: '@{arg1}'
+    defaultFormatting$@: '@{arg2}'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/t
+  steps:
+  - name: old version
+    cmd: 'us --version'
+    sh: 'us --version'
+  - name: uninstall
+    cmd: 'npm uninstall -g uniscript'
+    sh: 'npm uninstall -g uniscript'
+  - name: clear cache
+    cmd: 'npm cache verify'
+    sh: 'npm cache verify'
+  - name: install
+    cmd: 'npm install -g uniscript'
+    sh: 'npm install -g uniscript'
+  - name: new version
+    cmd: 'us --version'
+    sh: 'us --version'
+

@@ -16,6 +16,10 @@ us --version
 ```bash
 us -v
 ```
+To update uniscript:
+```bash
+us t/update
+```
 
 # AWS + Azure DevOps
 Use Amazon Web Service with Azure DevOps for CI/CD.

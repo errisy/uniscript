@@ -40,8 +40,7 @@ us aws/az-dev
 ```bash
 us aws/az-setup
 ```
-3) Add the project source files and create corresponding Azure DevOps pipelines:
-This will work if your default brand is either "main" or "master".
+3) Add the project source files and create corresponding Azure DevOps pipelines (This will work if your default brand is either "main" or "master"):
 ```bash
 us aws/az-util
 ```

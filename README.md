@@ -16,6 +16,7 @@ us --version
 ```bash
 us -v
 ```
+
 # AWS + Azure DevOps
 Use Amazon Web Service with Azure DevOps for CI/CD.
 You need to install [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) with the [devops extension](https://docs.microsoft.com/en-us/azure/devops/cli/?view=azure-devops).
@@ -27,6 +28,22 @@ Modify the 'az-dev-env.yml'.
 Then setup the project:
 ```bash
 us aws/az-setup
+```
+## Azure DevOps Utilities
+To get the tools working, a repo with the AWS utility functions for Azure DevOps is required.
+Create The Azure DevOps project, do the following steps:
+1) Initialize:
+```bash
+us aws/az-dev
+```
+2) Modify the 'az-dev-env.yml' with proper values, then run setup:
+```bash
+us aws/az-setup
+```
+3) Add the project source files and create corresponding Azure DevOps pipelines:
+This will work if your default brand is either "main" or "master".
+```bash
+us aws/az-util
 ```
 ## Azure DevOps Operations
 ### Run Pipeline

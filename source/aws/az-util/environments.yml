@@ -1,0 +1,19 @@
+# define the variables that will be shared across all pipelines
+# use following syntax to import
+# variables
+# - template: /environments.yml
+
+variables:
+  # shared variables:
+  Application: 'az-util'
+  Version: 1.0.0
+  LambdaRuntimeDotNetCore: dotnetcore3.1
+  LambdaRuntimeNodeJS: nodejs14.x
+  LambdaRuntimePython: python3.9
+  
+  # this project is for the setup of AWS environments, only one setup is required
+  # conditional variables:
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    EnvironmentTarget: prod
+    AWSAccountId: '@{awsAccountId}' # the 12 degits AWS account Id.
+    AWSRegion: '@{awsRegion}' # the aws region

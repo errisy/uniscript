@@ -4,64 +4,70 @@ script:
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/rpc/
     project$@: '@{arg0}'
   steps:
-    - name: get files
-      file:
-        source: "@{baseUrl}"
-        format:
-          - MyService1.ts
-          - MyService2.ts
-          - MyUsers.ts
-          - package.json
-          - transformers/add.test.ts
-          - transformers/add.ts
-          - transformers/code-builder.ts
-          - transformers/csharp/websocket-service/BaseMessage.cs
-          - transformers/csharp/websocket-service/WebApplicationExtensions.cs
-          - transformers/csharp/websocket-service/WebSocketService.cs
-          - transformers/csharp/websocket-service/WebSocketServiceBase.cs
-          - transformers/csharp-websocket-service.ts
-          - transformers/definitions.ts
-          - transformers/expression-parser.ts
-          - transformers/group-management.ts
-          - transformers/MyService1.ts
-          - transformers/MyService2.ts
-          - transformers/os-utilities.ts
-          - transformers/package.json
-          - transformers/python/websocket-lambda-service/BaseMessage.py
-          - transformers/python/websocket-lambda-service/GroupAuthorizations.py
-          - transformers/python/websocket-lambda-service/LambdaWebsocketTypes.py
-          - transformers/python/websocket-lambda-service/ReturnMessage.py
-          - transformers/python/websocket-lambda-service/WebsocketService.py
-          - transformers/python/websocket-lambda-service/WebsocketServiceBase.py
-          - transformers/python-websocket-lambda-service.ts
-          - transformers/README.md
-          - transformers/resolvers.ts
-          - transformers/rpc-configuration.ts
-          - transformers/sourcefile-count.ts
-          - transformers/SyntaxKindMap.ts
-          - transformers/translate.ts
-          - transformers/tsconfig.json
-          - transformers/types.d.ts
-          - transformers/typescript/websocket-angular-client/BaseMessage.ts
-          - transformers/typescript/websocket-angular-client/local-storage.service.ts
-          - transformers/typescript/websocket-angular-client/token-holder.service.ts
-          - transformers/typescript/websocket-angular-client/WebsocketService.ts
-          - transformers/typescript/websocket-angular-client/WebsocketServiceBase.ts
-          - transformers/typescript/websocket-lambda-service/BaseMessage.ts
-          - transformers/typescript/websocket-lambda-service/GroupAuthorizations.ts
-          - transformers/typescript/websocket-lambda-service/LambdaWebsocketTypes.ts
-          - transformers/typescript/websocket-lambda-service/ReturnMessage.ts
-          - transformers/typescript/websocket-lambda-service/WebsocketService.ts
-          - transformers/typescript/websocket-lambda-service/WebsocketServiceBase.ts
-          - transformers/typescript-websocket-angular-client.ts
-          - transformers/typescript-websocket-lambda-service.ts
-          - transformers/uni-rpc.json
-          - transformers/uni-rpc.yaml
-          - tsconfig.json
-          - uni-rpc.yaml
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - MyService1.ts
+      - MyService2.ts
+      - MyUsers.ts
+      - package.json
+      - transformers/add.test.ts
+      - transformers/add.ts
+      - transformers/code-builder.ts
+      - transformers/csharp/websocket-service/BaseMessage.cs
+      - transformers/csharp/websocket-service/WebApplicationExtensions.cs
+      - transformers/csharp/websocket-service/WebSocketService.cs
+      - transformers/csharp/websocket-service/WebSocketServiceBase.cs
+      - transformers/csharp-websocket-service.ts
+      - transformers/definitions.ts
+      - transformers/expression-parser.ts
+      - transformers/group-management.ts
+      - transformers/MyService1.ts
+      - transformers/MyService2.ts
+      - transformers/os-utilities.ts
+      - transformers/package.json
+      - transformers/python/websocket-lambda-service/BaseMessage.py
+      - transformers/python/websocket-lambda-service/GroupAuthorizations.py
+      - transformers/python/websocket-lambda-service/LambdaWebsocketTypes.py
+      - transformers/python/websocket-lambda-service/ReturnMessage.py
+      - transformers/python/websocket-lambda-service/WebsocketService.py
+      - transformers/python/websocket-lambda-service/WebsocketServiceBase.py
+      - transformers/python-websocket-lambda-service.ts
+      - transformers/README.md
+      - transformers/resolvers.ts
+      - transformers/rpc-configuration.ts
+      - transformers/sourcefile-count.ts
+      - transformers/SyntaxKindMap.ts
+      - transformers/translate.ts
+      - transformers/tsconfig.json
+      - transformers/types.d.ts
+      - transformers/typescript/websocket-angular-client/BaseMessage.ts
+      - transformers/typescript/websocket-angular-client/local-storage.service.ts
+      - transformers/typescript/websocket-angular-client/token-holder.service.ts
+      - transformers/typescript/websocket-angular-client/WebsocketService.ts
+      - transformers/typescript/websocket-angular-client/WebsocketServiceBase.ts
+      - transformers/typescript/websocket-lambda-service/BaseMessage.ts
+      - transformers/typescript/websocket-lambda-service/GroupAuthorizations.ts
+      - transformers/typescript/websocket-lambda-service/LambdaWebsocketTypes.ts
+      - transformers/typescript/websocket-lambda-service/ReturnMessage.ts
+      - transformers/typescript/websocket-lambda-service/WebsocketService.ts
+      - transformers/typescript/websocket-lambda-service/WebsocketServiceBase.ts
+      - transformers/typescript-websocket-angular-client.ts
+      - transformers/typescript-websocket-lambda-service.ts
+      - transformers/uni-rpc.json
+      - transformers/uni-rpc.yaml
+      - tsconfig.json
+      - uni-rpc.yaml
   - name: npm install
     cmd: cd @{project} && npm i
     bash: cd @{project} ; npm i
-  - name: npm install
+  - name: npm install transformers
     cmd: cd @{project}/transformers && npm i
     bash: cd @{project}/transformers ; npm i
+  - name: run ts-patch
+    cmd: cd @{project} && npm run prepare
+    bash: cd @{project} ; npm run prepare

@@ -1,0 +1,46 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: 'https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-util/'
+    helperProject$: 'aws-devops-helper'
+    utilsProject$: 'cloudformation-utils'
+    jwtProject$: 'jwt-verify'
+  steps:
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: ''
+      copy:
+      - aws-devops-helper/cloudformation.yml
+      - aws-devops-helper/lambda.ts
+      - aws-devops-helper/package-lock.json
+      - aws-devops-helper/package.json
+      - aws-devops-helper/pipeline.yml
+      - aws-devops-helper/tsconfig.json
+      - cloudformation-utils/cloudformation.yml
+      - cloudformation-utils/index.py
+      - cloudformation-utils/pipeline.yml
+      - jwt-verify/cloudformation.yml
+      - jwt-verify/layer.dockerfile
+      - jwt-verify/package.json
+      - jwt-verify/pipeline.yml
+      - README.md
+      format:
+      - environments.yml
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Setup Azure DevOps Utilities" && git pull && git push
+    sh: git add -A ; git commit -a -m "Setup Azure DevOps Utilities" ; git pull ; git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline @{helperProject}
+    cmd: az pipelines create --name @{helperProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{helperProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{utilsProject}
+    cmd: az pipelines create --name @{utilsProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{utilsProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{jwtProject}
+    cmd: az pipelines create --name @{jwtProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{jwtProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

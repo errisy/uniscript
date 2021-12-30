@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
     - dev/*
+    - main
     - master
     - prod/*
   paths:

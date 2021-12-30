@@ -31,7 +31,7 @@ us aws/az-setup
 ```
 ## Azure DevOps Utilities
 To get the tools working, a repo with the AWS utility functions for Azure DevOps is required.
-Create The Azure DevOps project, do the following steps:
+0) Create The Azure DevOps project, create the "AWS Service Connection", where the connection name is the 12 digit AWS Account Id.
 1) Initialize:
 ```bash
 us aws/az-dev

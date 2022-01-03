@@ -10,7 +10,7 @@ variables:
   LambdaRuntimeDotNetCore: dotnetcore3.1
   LambdaRuntimeNodeJS: nodejs14.x
   LambdaRuntimePython: python3.9
-  AzureUtil: az-util
+  AzureUtil: '@{AzureUtil}'
   
   # conditional variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/') }}:

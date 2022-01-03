@@ -1,0 +1,34 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/api/websocket/
+    arg0$: 'websocket'
+    arg1$: 'jwt-layer'
+    arg2$: 'users'
+    project$@: '@{arg0}'
+    jwtLayer$@: '@{arg1}'
+    usersProject$@: '@{arg2}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - tsconfig.json
+      - lambda.ts
+      format:
+      - cloudformation.yml
+      - pipeline.yml
+      - package.json
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

@@ -85,8 +85,7 @@ steps:
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
         {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimePython)"},
-        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},
-        {"ParameterKey":"AzureUtil", "ParameterValue":"$(AzureUtil)"}
+        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
       ]
     capabilityAutoExpand: true
 

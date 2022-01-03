@@ -4,16 +4,32 @@ trigger:
     include:
     - dev/*
     - main
-    - master
     - prod/*
   paths:
     include:
-    - 'aws-devops-helper/*'
+    - '@{project}/*'
+    - '@{usersProject}/*'
+
+# when this stack should be triggered by another project (usually a lambda layer)
+# resources:
+#   pipelines:
+#     - pipeline: 'referred-pipeline'
+#       project: '${AzureDevOpsProject}'
+#       source: 'referred-pipeline'
+#       trigger:
+#         branches:
+#         - dev/*
+#         - main
+#         - prod/*
 
 variables:
 - template: /environments.yml
 - name: project
-  value: 'aws-devops-helper'
+  value: '@{project}'
+- name: usersproject
+  value: '@{usersProject}'
+- name: jwtlayer
+  value: '@{jwtLayer}'
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -59,10 +75,10 @@ steps:
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    functionName: '$(Application)--aws-devops-helper'
+    functionName: '$(AzureUtil)--aws-devops-helper'
     payload: |
       {
-        "name": "$(Application)--$(project)--$(AWSRegion)",
+        "name": "$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)",
         "query": "CloudFormationState"
       }
     outputVariable: 'ShouldDeleteStack'
@@ -73,13 +89,13 @@ steps:
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    stackName: '$(Application)--$(project)--$(AWSRegion)'
+    stackName: '$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)'
 - task: CloudFormationCreateOrUpdateStack@1
   displayName: Run the CloudFormation Create/Update
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    stackName: '$(Application)--$(project)--$(AWSRegion)'
+    stackName: '$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)'
     templateSource: 's3'
     s3BucketName: '$(AWSAccountId)-$(AWSRegion)-stacks'
     s3ObjectKey: '$(Application)/$(EnvironmentTarget)/$(Version)/$(project)/$(Build.BuildId)/cloudformation.yml'
@@ -93,7 +109,10 @@ steps:
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
         {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimeNodeJS)"},
-        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
+        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},
+        {"ParameterKey":"UsersProject", "ParameterValue":"$(usersproject)"},
+        {"ParameterKey":"AzureUtil", "ParameterValue":"$(AzureUtil)"},
+        {"ParameterKey":"JwtLayer", "ParameterValue":"$(jwtlayer)"}
       ]
     capabilityAutoExpand: true
 

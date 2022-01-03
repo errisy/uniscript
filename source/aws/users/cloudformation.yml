@@ -159,7 +159,7 @@ Resources:
         #     - 'https://${CloudFrontId}.cloudfront.net'
         #     - CloudFrontId: 
         #         Fn::Transform:
-        #           Name: !Sub ${AzureUtil}--cloudformation-utils
+        #           Name: '@{AzureUtil}--cloudformation-utils'
         #           Parameters:
         #             InputString: !Sub 'S3CloudFrontDistribution@${Application}--[ui-project]--${AWSRegion}--${EnvironmentTarget}'
         #             Operation: Stack
@@ -170,7 +170,7 @@ Resources:
         #     - 'https://${CloudFrontId}.cloudfront.net'
         #     - CloudFrontId: 
         #         Fn::Transform:
-        #           Name: !Sub ${AzureUtil}--cloudformation-utils
+        #           Name: '@{AzureUtil}--cloudformation-utils'
         #           Parameters:
         #             InputString: !Sub 'S3CloudFrontDistribution@${Application}--[ui-project]--${AWSRegion}--${EnvironmentTarget}'
         #             Operation: Stack

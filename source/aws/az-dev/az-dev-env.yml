@@ -8,4 +8,6 @@ script:
     azureDevOpsOrganization$@: '@{arg3}' # The Azure Organization Name
     azureDevOpsProject$@: '@{arg4}' # The Azure Project Name
     azureDevOpsRepository$@: '@{arg5}' # The Azure Repository Name
+    # The Azure Utilities Application Name
+    AzureUtil: 'az-util'
 # Run "us aws/az-setup" to complete the configuration.

@@ -15,6 +15,7 @@ Parameters:
     Type: String
   BuildId:
     Type: String
+  
 
 Resources:
   TransformExecutionRole:
@@ -49,7 +50,7 @@ Resources:
   Transform:
     Type: AWS::CloudFormation::Macro
     Properties:
-      Name: !Sub ${Project}
+      Name: !Sub ${Application}--${Project}
       Description: Provides various string processing functions
       FunctionName: !GetAtt TransformFunction.Arn
 

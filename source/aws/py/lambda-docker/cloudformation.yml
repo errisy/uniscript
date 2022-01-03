@@ -15,7 +15,9 @@ Parameters:
     Type: String
   BuildId:
     Type: String
-
+  AzureUtil:
+    Type: String
+    
 Resources:
   BatchComputeRole:
     Type: AWS::IAM::Role

@@ -4,7 +4,6 @@ script:
     baseUrl$: 'https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-util/'
     helperProject$: 'aws-devops-helper'
     utilsProject$: 'cloudformation-utils'
-    jwtProject$: 'jwt-verify'
   steps:
   - name: get files
     file:
@@ -20,10 +19,6 @@ script:
       - cloudformation-utils/cloudformation.yml
       - cloudformation-utils/index.py
       - cloudformation-utils/pipeline.yml
-      - jwt-verify/cloudformation.yml
-      - jwt-verify/layer.dockerfile
-      - jwt-verify/package.json
-      - jwt-verify/pipeline.yml
       - README.md
       format:
       - environments.yml
@@ -40,7 +35,4 @@ script:
     ignoreError: True
   - name: create pipeline @{utilsProject}
     cmd: az pipelines create --name @{utilsProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{utilsProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
-    ignoreError: True
-  - name: create pipeline @{jwtProject}
-    cmd: az pipelines create --name @{jwtProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{jwtProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
     ignoreError: True

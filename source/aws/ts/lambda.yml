@@ -1,53 +1,24 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda/
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
-  - name: Download lambda_entry.py
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry.py'
-      toFile: '@{project}/lambda_entry.py'
-      toFormat: True
-  - name: Download pipeline.yml
-    web:
-      method: get
-      url: '@{baseUrl}/pipeline.yml'
-      toFile: '@{project}/pipeline.yml'
-      toFormat: True
-  - name: Download cloudformation.yml
-    web:
-      method: get
-      url: '@{baseUrl}/cloudformation.yml'
-      toFile: '@{project}/cloudformation.yml'
-      toFormat: False
-  - name: Download package.json
-    web:
-      method: get
-      url: '@{baseUrl}/package.json'
-      toFile: '@{project}/package.json'
-      toFormat: True
-  - name: Download tsconfig.json
-    web:
-      method: get
-      url: '@{baseUrl}/tsconfig.json'
-      toFile: '@{project}/tsconfig.json'
-      toFormat: False
-  - name: Download lambda_entry.test.ts
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry.test.ts'
-      toFile: '@{project}/lambda_entry.test.ts'
-      toFormat: True
-  - name: Download use_env.ts
-    web:
-      method: get
-      url: '@{baseUrl}/use_env.ts'
-      toFile: '@{project}/use_env.ts'
-      toFormat: True
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - cloudformation.yml
+      - tsconfig.json
+      format:
+      - lambda_entry.ts
+      - lambda_entry.test.ts
+      - pipeline.yml
+      - package.json
+      - use_env.ts
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

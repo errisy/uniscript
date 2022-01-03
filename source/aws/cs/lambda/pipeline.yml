@@ -78,7 +78,7 @@ steps:
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    functionName: 'aws-devops-helper'
+    functionName: '$(AzureUtil)--aws-devops-helper'
     payload: |
       {
         "name": "$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)",
@@ -112,7 +112,8 @@ steps:
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
         {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimeDotNetCore)"},
-        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
+        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},
+        {"ParameterKey":"AzureUtil", "ParameterValue":"$(AzureUtil)"}
       ]
     capabilityAutoExpand: true
 

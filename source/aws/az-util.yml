@@ -4,6 +4,9 @@ script:
     baseUrl$: 'https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/az-util/'
     helperProject$: 'aws-devops-helper'
     utilsProject$: 'cloudformation-utils'
+    cloudformationProject$: 'cloudformation-api'
+    cloudfrontProject$: 'cloudfront-api'
+    s3Project$: 's3-api'
   steps:
   - name: get files
     file:
@@ -19,6 +22,21 @@ script:
       - cloudformation-utils/cloudformation.yml
       - cloudformation-utils/index.py
       - cloudformation-utils/pipeline.yml
+      - cloudformation-api/cloudformation.yml
+      - cloudformation-api/lambda.ts
+      - cloudformation-api/package.json
+      - cloudformation-api/pipeline.yml
+      - cloudformation-api/tsconfig.json
+      - cloudfront-api/cloudformation.yml
+      - cloudfront-api/lambda.ts
+      - cloudfront-api/package.json
+      - cloudfront-api/pipeline.yml
+      - cloudfront-api/tsconfig.json
+      - s3-api/cloudformation.yml
+      - s3-api/lambda.ts
+      - s3-api/package.json
+      - s3-api/pipeline.yml
+      - s3-api/tsconfig.json
       - README.md
       format:
       - environments.yml
@@ -35,4 +53,13 @@ script:
     ignoreError: True
   - name: create pipeline @{utilsProject}
     cmd: az pipelines create --name @{utilsProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{utilsProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{cloudformationProject}
+    cmd: az pipelines create --name @{cloudformationProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{cloudformationProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{cloudfrontProject}
+    cmd: az pipelines create --name @{cloudfrontProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{cloudfrontProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{s3Project}
+    cmd: az pipelines create --name @{s3Project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{s3Project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
     ignoreError: True

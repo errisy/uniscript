@@ -1,101 +1,32 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cs/lambda-docker
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cs/lambda-docker/
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
-  - name: Download LambdaEntry.sln
-    web:
-      method: get
-      url: '@{baseUrl}/LambdaEntry.sln'
-      toFile: '@{project}/LambdaEntry.sln'
-      toFormat: False
-  - name: Download LambdaEntry.csproj
-    web:
-      method: get
-      url: '@{baseUrl}/LambdaEntry.csproj'
-      toFile: '@{project}/LambdaEntry.csproj'
-      toFormat: False
-  - name: Download Function.cs
-    web:
-      method: get
-      url: '@{baseUrl}/Function.cs'
-      toFile: '@{project}/Function.cs'
-      toFormat: True
-  - name: Download FunctionTest.cs
-    web:
-      method: get
-      url: '@{baseUrl}/FunctionTest.cs'
-      toFile: '@{project}/FunctionTest.cs'
-      toFormat: True
-  - name: Download Properties/launchSettings.json
-    web:
-      method: get
-      url: '@{baseUrl}/Properties/launchSettings.json'
-      toFile: '@{project}/Properties/launchSettings.json'
-      toFormat: False
-  - name: Download pipeline.yml
-    web:
-      method: get
-      url: '@{baseUrl}/pipeline.yml'
-      toFile: '@{project}/pipeline.yml'
-      toFormat: True
-  - name: Download cloudformation.yml
-    web:
-      method: get
-      url: '@{baseUrl}/cloudformation.yml'
-      toFile: '@{project}/cloudformation.yml'
-      toFormat: False
-  - name: Download test.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/test.cmd'
-      toFile: '@{project}/test.cmd'
-      toFormat: False
-  - name: Download test.sh
-    web:
-      method: get
-      url: '@{baseUrl}/test.sh'
-      toFile: '@{project}/test.sh'
-      toFormat: False
-  - name: Download publish.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/publish.cmd'
-      toFile: '@{project}/publish.cmd'
-      toFormat: False
-  - name: Download publish.sh
-    web:
-      method: get
-      url: '@{baseUrl}/publish.sh'
-      toFile: '@{project}/publish.sh'
-      toFormat: False
-  - name: Download lambda.dockerfile
-    web:
-      method: get
-      url: '@{baseUrl}/lambda.dockerfile'
-      toFile: '@{project}/lambda.dockerfile'
-      toFormat: True
-  - name: Download .dockerignore
-    web:
-      method: get
-      url: '@{baseUrl}/.dockerignore'
-      toFile: '@{project}/.dockerignore'
-      toFormat: False
-  - name: Download docker-build.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.cmd'
-      toFile: '@{project}/docker-build.cmd'
-      toFormat: True
-  - name: Download docker-build.sh
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.sh'
-      toFile: '@{project}/docker-build.sh'
-      toFormat: True
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - LambdaEntry.sln
+      - LambdaEntry.csproj
+      - Properties/launchSettings.json
+      - cloudformation.yml
+      - test.cmd
+      - test.sh
+      - publish.cmd
+      - publish.sh
+      - .dockerignore
+      format:
+      - Function.cs
+      - FunctionTest.cs
+      - pipeline.yml
+      - lambda.dockerfile
+      - docker-build.cmd
+      - docker-build.sh
   - name: git sync
     cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
     ignoreError: True

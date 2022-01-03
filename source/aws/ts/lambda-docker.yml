@@ -1,77 +1,28 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda-docker
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda-docker/
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
-  - name: Download lambda_entry.ts
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry.ts'
-      toFile: '@{project}/lambda_entry.ts'
-      toFormat: True
-  - name: Download pipeline.yml
-    web:
-      method: get
-      url: '@{baseUrl}/pipeline.yml'
-      toFile: '@{project}/pipeline.yml'
-      toFormat: True
-  - name: Download cloudformation.yml
-    web:
-      method: get
-      url: '@{baseUrl}/cloudformation.yml'
-      toFile: '@{project}/cloudformation.yml'
-      toFormat: False
-  - name: Download package.json
-    web:
-      method: get
-      url: '@{baseUrl}/package.json'
-      toFile: '@{project}/package.json'
-      toFormat: True
-  - name: Download tsconfig.json
-    web:
-      method: get
-      url: '@{baseUrl}/tsconfig.json'
-      toFile: '@{project}/tsconfig.json'
-      toFormat: False
-  - name: Download lambda_entry.test.ts
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry.test.ts'
-      toFile: '@{project}/lambda_entry.test.ts'
-      toFormat: True
-  - name: Download use_env.ts
-    web:
-      method: get
-      url: '@{baseUrl}/use_env.ts'
-      toFile: '@{project}/use_env.ts'
-      toFormat: True
-  - name: Download lambda.dockerfile
-    web:
-      method: get
-      url: '@{baseUrl}/lambda.dockerfile'
-      toFile: '@{project}/lambda.dockerfile'
-      toFormat: True
-  - name: Download .dockerignore
-    web:
-      method: get
-      url: '@{baseUrl}/.dockerignore'
-      toFile: '@{project}/.dockerignore'
-      toFormat: False
-  - name: Download docker-build.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.cmd'
-      toFile: '@{project}/docker-build.cmd'
-      toFormat: True
-  - name: Download docker-build.sh
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.sh'
-      toFile: '@{project}/docker-build.sh'
-      toFormat: True
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - cloudformation.yml
+      - tsconfig.json
+      - .dockerignore
+      format:
+      - lambda_entry.ts
+      - lambda_entry.test.ts
+      - use_env.ts
+      - pipeline.yml
+      - package.json
+      - lambda.dockerfile
+      - docker-build.cmd
+      - docker-build.sh
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

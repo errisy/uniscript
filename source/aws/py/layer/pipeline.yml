@@ -21,9 +21,6 @@ trigger:
 #         - main
 #         - prod/*
 
-resources:
-- repo: self
-
 variables:
 - template: /environments.yml
 - name: tag
@@ -102,8 +99,7 @@ steps:
         {"ParameterKey":"Version", "ParameterValue":"$(Version)"},
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
-        {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimeNodeJS)"},
-        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},
-        {"ParameterKey":"AzureUtil", "ParameterValue":"$(AzureUtil)"}
+        {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimePython)"},
+        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
       ]
     capabilityAutoExpand: true

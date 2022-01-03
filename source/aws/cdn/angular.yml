@@ -1,23 +1,19 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cdn/angular
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cdn/angular/
     project$@: '@{arg0}'
   steps:
   - name: create angular project
     cmd: 'ng new @{project} --routing=true --style=scss --strict=true'
-  - name: Download pipeline.yml
-    web:
-      method: get
-      url: '@{baseUrl}/pipeline.yml'
-      toFile: '@{project}/pipeline.yml'
-      toFormat: True
-  - name: Download cloudformation.yml
-    web:
-      method: get
-      url: '@{baseUrl}/cloudformation.yml'
-      toFile: '@{project}/cloudformation.yml'
-      toFormat: False
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - cloudformation.yml
+      format:
+      - pipeline.yml
   - name: git sync
     cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
     ignoreError: True

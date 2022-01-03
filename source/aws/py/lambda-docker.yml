@@ -1,65 +1,26 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda-docker
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/py/lambda-docker/
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
-  - name: Download lambda_entry.py
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry.py'
-      toFile: '@{project}/lambda_entry.py'
-      toFormat: True
-  - name: Download pipeline.yml
-    web:
-      method: get
-      url: '@{baseUrl}/pipeline.yml'
-      toFile: '@{project}/pipeline.yml'
-      toFormat: True
-  - name: Download cloudformation.yml
-    web:
-      method: get
-      url: '@{baseUrl}/cloudformation.yml'
-      toFile: '@{project}/cloudformation.yml'
-      toFormat: False
-  - name: Download package.json
-    web:
-      method: get
-      url: '@{baseUrl}/package.json'
-      toFile: '@{project}/package.json'
-      toFormat: True
-  - name: Download lambda_entry_test.py
-    web:
-      method: get
-      url: '@{baseUrl}/lambda_entry_test.py'
-      toFile: '@{project}/lambda_entry_test.py'
-      toFormat: True
-  - name: Download lambda.dockerfile
-    web:
-      method: get
-      url: '@{baseUrl}/lambda.dockerfile'
-      toFile: '@{project}/lambda.dockerfile'
-      toFormat: True
-  - name: Download .dockerignore
-    web:
-      method: get
-      url: '@{baseUrl}/.dockerignore'
-      toFile: '@{project}/.dockerignore'
-      toFormat: False
-  - name: Download docker-build.cmd
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.cmd'
-      toFile: '@{project}/docker-build.cmd'
-      toFormat: True
-  - name: Download docker-build.sh
-    web:
-      method: get
-      url: '@{baseUrl}/docker-build.sh'
-      toFile: '@{project}/docker-build.sh'
-      toFormat: True
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - cloudformation.yml
+      - .dockerignore
+      format:
+      - lambda_entry.py
+      - lambda_entry_test.py
+      - package.json
+      - lambda.dockerfile
+      - pipeline.yml
+      - docker-build.cmd
+      - docker-build.sh
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

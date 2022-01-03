@@ -4,127 +4,74 @@ trigger:
     include:
     - dev/*
     - main
+    - master
     - prod/*
   paths:
     include:
-    - '@{project}/*'
+    - 's3-api/*'
 
 # when this stack should be triggered by another project (usually a lambda layer)
 # resources:
 #   pipelines:
 #     - pipeline: 'referred-pipeline'
-#       project: 'customer-strategy'
+#       project: 's3-api/*'
 #       source: 'referred-pipeline'
 #       trigger:
 #         branches:
 #         - dev/*
-#         - main
+#         - master
 #         - prod/*
 
 variables:
 - template: /environments.yml
 - name: project
-  value: '@{project}'
+  value: 's3-api'
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '14.x'
 - script: |
-    rm -rf $(project)/archive
-    mkdir $(project)/archive
-    cp $(project)/cloudformation.yml $(project)/archive/cloudformation.yml
-  displayName: Setup $(project)/archive folder
-- task: ArchiveFiles@2
-  displayName: Pack Source files into ZIP package
+    rm -rf $(project)/dist
+  displayName: Delete the compiled JS files
+- task: Npm@1
+  displayName: Install Node Packages
   inputs:
-    rootFolderOrFile: '$(project)'
+    command: 'install'
+    workingDir: '$(project)'
+- task: compile-type-script@1
+  displayName: Compile the TypeScript project, output to $(project)/ folder
+  inputs:
+    compileType: '1'
+    projectPath: '$(project)/'
+- task: ArchiveFiles@2
+  displayName: Pack Compiled JS files into ZIP package
+  inputs:
+    rootFolderOrFile: '$(project)/build/'
     includeRootFolder: false
     archiveType: 'zip'
-    archiveFile: '$(project)/archive/source.zip'
+    archiveFile: '$(project)/dist/lambda.zip'
     replaceExistingArchive: true
 - script: |
-    cd $(project)
-    npm install -g @angular/cli
-    npm install
-    ng build --prod
-  displayName: Angular Bulid Pipeline into $(project)/dist/$(project)/
-- task: ArchiveFiles@2
-  displayName: Pack Angular files into $(project)/archive/angular.zip
-  inputs:
-    rootFolderOrFile: '$(project)/dist/$(project)'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(project)/archive/angular.zip'
-    replaceExistingArchive: true
+    cp $(project)/cloudformation.yml $(project)/dist/
+  displayName: Create BuildID verions alias for zip package and CloudFormation
 - task: S3Upload@1
   displayName: Upload all files to stacks folder in S3
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
     bucketName: '$(AWSAccountId)-$(AWSRegion)-stacks'
-    sourceFolder: '$(project)/archive'
+    sourceFolder: '$(project)/dist'
     globExpressions: '**'
     targetFolder: '$(Application)/$(EnvironmentTarget)/$(Version)/$(project)/$(Build.BuildId)'
     createBucket: true
-- task: LambdaInvokeFunction@1
-  continueOnError: true
-  displayName: Delete S3 Files
-  inputs:
-    awsCredentials: '$(AWSAccountId)'
-    regionName: '$(AWSRegion)'
-    functionName: '$(AzureUtil)--s3-api'
-    payload: |
-      {
-        "Remove": [ "s3://$(AWSAccountId)--$(AWSRegion)--$(Application)--$(project)--$(EnvironmentTarget)/" ]
-      }
-- task: S3Upload@1
-  displayName: Upload angular files to s3 bucket
-  inputs:
-    awsCredentials: '$(AWSAccountId)'
-    regionName: '$(AWSRegion)'
-    bucketName: '$(AWSAccountId)--$(AWSRegion)--$(Application)--$(project)--$(EnvironmentTarget)'
-    sourceFolder: '$(project)/dist/$(project)'
-    globExpressions: '**'
-    targetFolder: ''
-    createBucket: true
-- task: LambdaInvokeFunction@1
-  continueOnError: true
-  displayName: Get CloudFormation Physical Id
-  inputs:
-    awsCredentials: '$(AWSAccountId)'
-    regionName: '$(AWSRegion)'
-    functionName: '$(AzureUtil)--cloudformation-api'
-    payload: |
-      {
-        "action": "Get",
-        "name": "$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)",
-        "id": "S3CloudFrontDistribution"
-      }
-    outputVariable: S3CloudFrontDistributionId
-- task: LambdaInvokeFunction@1
-  continueOnError: true
-  displayName: Invalidate CloudFront Distribution
-  inputs:
-    awsCredentials: '$(AWSAccountId)'
-    regionName: '$(AWSRegion)'
-    functionName: '$(AzureUtil)--cloudfront-api'
-    payload: |
-      {
-        "Action": "Invalidate",
-        "DistributionId": $(S3CloudFrontDistributionId),
-        "Paths": [ "/*" ]
-      }
 - task: LambdaInvokeFunction@1
   continueOnError: true
   displayName: Check the state of CloudFormation
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    functionName: '$(AzureUtil)--aws-devops-helper'
+    functionName: '$(Application)--aws-devops-helper'
     payload: |
       {
         "name": "$(Application)--$(project)--$(AWSRegion)--$(EnvironmentTarget)",
@@ -158,8 +105,7 @@ steps:
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
         {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimeNodeJS)"},
-        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},
-        {"ParameterKey":"AzureUtil", "ParameterValue":"$(AzureUtil)"}
+        {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"}
       ]
     capabilityAutoExpand: true
 

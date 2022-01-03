@@ -59,7 +59,7 @@ steps:
   inputs:
     awsCredentials: '$(AWSAccountId)'
     regionName: '$(AWSRegion)'
-    functionName: '$(AzureUtil)--aws-devops-helper'
+    functionName: '$(Application)--aws-devops-helper'
     payload: |
       {
         "name": "$(Application)--$(project)--$(AWSRegion)",

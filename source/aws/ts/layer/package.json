@@ -1,0 +1,9 @@
+{
+    "name": "@{project}",
+    "devDependencies": {
+        "@types/node": "17.0.7",
+        "aws-sdk": "2.1048.0"
+    },
+    "dependencies": {
+    }
+}

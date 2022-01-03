@@ -2,7 +2,7 @@
     "compileOnSave": false,
     "compilerOptions": {
       "baseUrl": "./",
-      "outDir": "./bin",
+      "outDir": "./build",
       "sourceMap": false,
       "declaration": false,
       "downlevelIteration": true,

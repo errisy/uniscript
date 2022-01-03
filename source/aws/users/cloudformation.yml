@@ -137,7 +137,7 @@ Resources:
         - Name: 'email'
           Value: '@{primaryEmail}'
         - Name: phone_number
-          Value: '+61424773275'
+          Value: '@{primaryPhone}'
   UserPoolUserGroupAttachmentTest:
     Type: AWS::Cognito::UserPoolUserToGroupAttachment
     DependsOn: UserPoolUserTest

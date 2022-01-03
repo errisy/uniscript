@@ -4,10 +4,12 @@ script:
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/users/
     arg0$: 'users'
     arg1$: 'users-test@some-email.com'
-    arg2$: 'http://localhost:4200'
+    arg2$: '+16665554321'
+    arg3$: 'http://localhost:4200'
     project$@: '@{arg0}'
     primaryEmail$@: '@{arg1}'
-    localRedirectUrl$@: '@{arg2}'
+    primaryPhone$@: '@{arg2}'
+    localRedirectUrl$@: '@{arg3}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'

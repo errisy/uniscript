@@ -69,6 +69,10 @@ us aws/py/lambda [project-name]
 ```bash
 us aws/py/lambda-docker [project-name]
 ```
+### Create Python Layer
+```bash
+us aws/py/layer [project-name]
+```
 ### Create TypeScript Project
 ```bash
 us aws/ts/lambda [project-name]
@@ -76,6 +80,10 @@ us aws/ts/lambda [project-name]
 ### Create TypeScript Docker Project
 ```bash
 us aws/ts/lambda-docker [project-name]
+```
+### Create TypeScript Layer
+```bash
+us aws/ts/layer [project-name]
 ```
 ### Create C# Project
 ```bash
@@ -90,4 +98,23 @@ us aws/cs/lambda-docker [project-name]
 This requires [@angular/cli](https://www.npmjs.com/package/@angular/cli)
 ```bash
 us aws/cdn/angular [project-name]
+```
+
+## AWS Users
+### Users
+Create a users project
+```bash
+us aws/users
+```
+
+## AWS API
+## JWT Layer
+JWT Layer is required for Websocket, install it first before using the following API projects. JWT Layer is a nodejs layer.
+```bash
+us aws/api/jwt-layer
+```
+## Websocket
+Create a Websocket project
+```bash
+us aws/api/websocket [project-name]
 ```

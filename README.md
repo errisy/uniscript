@@ -48,6 +48,7 @@ us aws/az-setup
 ```bash
 us aws/az-util
 ```
+4) Details about [Azure Utilities](https://github.com/errisy/uniscript/tree/main/source/aws/az-util)
 ## Azure DevOps Operations
 ### Run Pipeline
 Run the Azure DevOps pipeline for project:

@@ -2,6 +2,7 @@ script:
   parameters:
     AzDevEnv+: az-dev-env.yml
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/rpc/
+    arg0$: 'rpc'
     project$@: '@{arg0}'
   steps:
   - name: Make The Project Directory

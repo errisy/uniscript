@@ -117,6 +117,7 @@ dist
 .pnp.*
 
 .vs/
+.idea/
 
 bin/
 obj/

@@ -1,0 +1,41 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cs/lambda/
+    project$@: '@{arg0}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - LambdaEntry.sln
+      - LambdaEntry.csproj
+      - Properties/launchSettings.json
+      - cloudformation.yml
+      - test.cmd
+      - test.sh
+      - publish.cmd
+      - publish.sh
+      - UniRpc/BaseMessage.cs
+      - UniRpc/GroupAuthorizations.cs
+      - UniRpc/LambdaWebsocketTypes.cs
+      - UniRpc/ReturnMessage.cs
+      - UniRpc/WebsocketService.cs
+      - UniRpc/WebsocketServiceBase.cs
+      format:
+      - Function.cs
+      - FunctionTest.cs
+      - pipeline.yml
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

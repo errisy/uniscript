@@ -65,9 +65,9 @@ Resources:
       #   Variables:
       #     Key: Value
 
-  # ApiGatewayInvokePermission:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     Action: lambda:InvokeFunction
-  #     FunctionName: !Ref Lambda
-  #     Principal: apigateway.amazonaws.com
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref Lambda
+      Principal: apigateway.amazonaws.com

@@ -1,0 +1,9 @@
+{
+    "name": "@{project}",
+    "scripts": {
+        "watch": "nodemon -e py lambda_entry.py"
+    },
+    "devDependencies": {
+        "nodemon": "2.0.15"
+    }
+}

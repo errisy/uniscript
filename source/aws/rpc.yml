@@ -72,3 +72,6 @@ script:
   - name: run ts-patch
     cmd: cd @{project} && npm run prepare
     bash: cd @{project} ; npm run prepare
+  - name: run code transpiler
+    cmd: cd @{project} && npm run tsc
+    bash: cd @{project} ; npm run tsc

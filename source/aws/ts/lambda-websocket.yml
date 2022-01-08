@@ -1,0 +1,41 @@
+script:
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda/
+    project$@: '@{arg0}'
+  steps:
+  - name: Make The Project Directory
+    mkdir: '@{project}'
+  - name: get files
+    file:
+      source: "@{baseUrl}"
+      destination: '@{project}/'
+      copy:
+      - cloudformation.yml
+      - tsconfig.json
+      - UniRpc/BaseMessage.ts
+      - UniRpc/GroupAuthorizationPolicies.ts
+      - UniRpc/GroupAuthorizations.ts
+      - UniRpc/LambdaWebsocketTypes.ts
+      - UniRpc/ReturnMessage.ts
+      - UniRpc/WebsocketService.ts
+      - UniRpc/WebsocketServiceBase.ts
+      format:
+      - lambda_entry.ts
+      - lambda_entry.test.ts
+      - pipeline.yml
+      - package.json
+      - use_env.ts
+  - name: npm install
+    cmd: cd @{project} && npm i && cd ..
+    bash: cd @{project} ; npm i ; cd ..
+  - name: git sync
+    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    ignoreError: True
+  - name: branch name
+    cmd: git branch --show-current
+    post: |
+      $['gitBranchName'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: create pipeline
+    cmd: az pipelines create --name @{project} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{project}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True

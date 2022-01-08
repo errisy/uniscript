@@ -1,0 +1,1 @@
+dotnet publish LambdaEntry.csproj --output publish --configuration Release

@@ -4,6 +4,7 @@ import { RPC, Target } from './rpc-configuration';
 import { CodeBuilder } from './code-builder';
 import { CopyDirectory, MakeDirectories, Remove, ResolvePath, WriteFile } from './os-utilities';
 import * as path from 'path';
+import { GroupAuthorization, GroupManagement } from './group-management';
 
 export class Transpiler {
     constructor (private resolver: SourceFileResovler) {
@@ -18,6 +19,10 @@ export class Transpiler {
                     Remove(topLevelNamespacePath);
                     CodeGeneration.AsEmitter(instance).emitFiles(rootDirectory);
                 }
+            }
+            if (this.resolver.Groups && this.resolver.Groups.size > 0) {
+                let groups = new CodeGeneration.GroupAuthorizationsEmitter(this.resolver.Groups);
+                groups.emitFile(rootDirectory);
             }
         }
     }
@@ -54,6 +59,11 @@ module CodeGeneration {
                 // This is the special case for array.
                 let arrayType = typeInstance.GenericArguments[0];
                 return `${mapType(arrayType, builder)}[]`;
+            } else if (typeInstance.GenericDefinition.Reference.SystemType &&
+                typeInstance.GenericDefinition.Reference.SystemType == 'Promise' &&
+                typeInstance.GenericArguments[0].SystemType &&
+                typeInstance.GenericArguments[0].SystemType == 'void') {
+                return TypeMappings.get('Promise');
             } else {
                 return `${mapType(typeInstance.GenericDefinition, builder)}<${typeInstance.GenericArguments.map(arg => mapType(arg, builder)).join(', ')}>`;
             }
@@ -184,7 +194,7 @@ module CodeGeneration {
             if (this.instance.Base) {
                 baseTypes.push(this.emitType(this.instance.Base, builder));
             } else {
-                baseTypes.push('WebSocketServiceBase');
+                baseTypes.push('WebsocketServiceBase');
             }
             if (Array.isArray(this.instance.Implementations)) {
                 for (let implementation of this.instance.Implementations) {
@@ -196,13 +206,13 @@ module CodeGeneration {
         emitService(builder: CodeBuilder, indent: number) {
             builder.addImport('System');
             builder.addImport('System.Collections.Generic');
-            builder.addImport('UniRpc.WebApplication');
+            builder.addImport('UniRpc');
             let baseTypes: string[] = [];
             emitComments(builder, indent, this.instance.Comments);
             if (this.instance.Base) {
                 baseTypes.push(this.emitType(this.instance.Base, builder));
             } else {
-                baseTypes.push('WebSocketServiceBase');
+                baseTypes.push('WebsocketServiceBase');
             }
             if (Array.isArray(this.instance.Implementations)) {
                 for (let implementation of this.instance.Implementations) {
@@ -235,11 +245,18 @@ module CodeGeneration {
                 let genericTypeNames = this.instance.GenericArguments
                     .map(arg => `typeof(${arg.Name}).FullName`)
                     .join(', ');
-                builder.appendLine(`__genericArguments = new List<string>() { ${genericTypeNames} }.AsReadOnly();`, indent + 1);
+                builder.appendLine(`__genericArguments = new string[] { ${genericTypeNames} };`, indent + 1);
             } else {
-                builder.appendLine(`__genericArguments = new List<string>().AsReadOnly();`, indent + 1);
+                builder.appendLine(`__genericArguments = new string[] {};`, indent + 1);
             }
             builder.appendLine(`}`, indent);
+        }
+        emitReturnType(type: Type, builder: CodeBuilder): string {
+            if (type.Reference && type.Reference.SystemType == 'void') {
+                return 'System.Threading.Tasks.Task';
+            } else {
+                return `System.Threading.Tasks.Task<${this.emitType(type, builder)}>`;
+            }
         }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
             emitComments(builder, indent, method.Comments, method);
@@ -247,9 +264,9 @@ module CodeGeneration {
                 let genericArugments = method.GenericArguments
                     .map(arg => this.emitType(arg, builder))
                     .join(', ');
-                    builder.appendLine(`public abstract System.Threading.Tasks.Task<${this.emitType(method.ReturnType, builder)}> ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                    builder.appendLine(`public abstract ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             } else {
-                builder.appendLine(`public abstract System.Threading.Tasks.Task<${this.emitType(method.ReturnType, builder)}> ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                builder.appendLine(`public abstract ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             }
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
@@ -284,7 +301,7 @@ module CodeGeneration {
                         .map(parameter => `____${parameter.Name}`)
                         .join(', ');
                 if (method.ReturnType.Reference === VoidType) {
-                    builder.appendLine(`${method.Name}(${parameterNames});`, contentIndent);
+                    builder.appendLine(`await ${method.Name}(${parameterNames});`, contentIndent);
                     builder.appendLine(`break;`, contentIndent);
                 } else {
                     builder.appendLine(`return message.ReturnMessage(await ${method.Name}(${parameterNames}));`, contentIndent);
@@ -378,7 +395,7 @@ module CodeGeneration {
         emitServiceInterface(builder: CodeBuilder, indent: number) {
             builder.addImport('System');
             builder.addImport('System.Collections.Generic');
-            builder.addImport('UniRpc.WebApplication');
+            builder.addImport('UniRpc');
             emitComments(builder, indent, this.instance.Comments);
             let heritage = this.emitHeritage(builder);
             if (this.instance.IsGeneric) {
@@ -395,15 +412,22 @@ module CodeGeneration {
             }
             builder.appendLine(`}`, indent);
         }
+        emitReturnType(type: Type, builder: CodeBuilder): string {
+            if (type.Reference && type.Reference.SystemType == 'void') {
+                return 'System.Threading.Tasks.Task';
+            } else {
+                return `System.Threading.Tasks.Task<${this.emitType(type, builder)}>`;
+            }
+        }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
             emitComments(builder, indent, method.Comments, method);
             if (method.IsGeneric) {
                 let genericArugments = method.GenericArguments
                     .map(arg => this.emitType(arg, builder))
                     .join(', ');
-                    builder.appendLine(`public ${this.emitType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                    builder.appendLine(`public ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             } else {
-                builder.appendLine(`public ${this.emitType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                builder.appendLine(`public ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             }
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
@@ -461,6 +485,96 @@ module CodeGeneration {
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
             return CodeGeneration.mapType(typeInstance, builder);
+        }
+    }
+
+    export class GroupAuthorizationsEmitter {
+        keys: string[] = [];
+        constructor (private groups: Map<string, GroupManagement>) {}
+        emitFile(rootDirectory: string){
+            let filename = path.join(rootDirectory, 'UniRpc/GroupAuthorizationPolicies.cs');
+            let builder: CodeBuilder = new CodeBuilder(importBuilder);
+            let indent = 0;
+            builder.appendLine(`namespace UniRpc`, indent);
+            builder.appendLine(`{`, indent);
+            ++indent;
+            builder.appendLine(`public static partial class Static`, indent);
+            builder.appendLine(`{`, indent);
+            ++indent;
+            for (let key of this.groups.keys()) {
+                this.keys.push(key);
+            }
+            this.keys.sort();
+            for (let key of this.keys) {
+                let group = this.groups.get(key);
+                this.emitGroupPolicy(builder, indent, group);
+            }
+            this.emitPolicySets(builder, indent);
+            --indent;
+            builder.appendLine(`}`); //  class
+            --indent;
+            builder.appendLine(`}`); //  namespace
+            console.log('Write Code to:', filename);
+            WriteFile(filename, builder.build(), 'utf-8');
+        }
+        emitGroupPolicy(builder: CodeBuilder, indent: number, group: GroupManagement) {
+            if (group.Authorizations.size == 0) return;
+            let memberIndent = indent + 1;
+            let memberContentIndent = memberIndent + 1;
+            let serviceIndent = memberContentIndent + 1;
+            builder.appendLine(`public static IGroupPolicySet ${group.Name} = new IGroupPolicySet {`, indent);
+            let definedMembers: string[] = [];
+            let memberCount = 0;
+            for (let member of group.Members) {
+                if (!group.Authorizations.has(member)) continue;
+                let memberPolicy = group.Authorizations.get(member);
+                if (memberPolicy.Services.size == 0) continue;
+                definedMembers.push(member);
+                ++memberCount;
+            }
+            let memberIndex = 0;
+            for (let member of definedMembers) {
+                let memberPolicy = group.Authorizations.get(member);
+                let serviceSize = memberPolicy.Services.size;
+                ++memberIndex;
+                let memberComma = memberIndex < memberCount ? ',' : '';
+                builder.appendLine(`{ "${member}", new IGroupPolicy {`, memberIndent);
+                builder.appendLine(`Name = "${member}",`, memberContentIndent);
+                builder.appendLine(`Services = new System.Collections.Generic.Dictionary<string, object> {`, memberContentIndent);
+                let serviceIndex = 0;
+                for (let service of memberPolicy.Services.keys()) {
+                    ++serviceIndex;
+                    let servicePolicy = memberPolicy.Services.get(service);
+                    let serviceComma = serviceIndex < serviceSize ? ',' : '';
+                    if (servicePolicy.AllowAll) {
+                        builder.appendLine(`{ "${service}", "*" }${serviceComma}`, serviceIndent + 1);
+                    } else if (servicePolicy.AllowMethods.size > 0) {
+                        if (servicePolicy.AllowMethods.size == 0) continue;
+                        let methods: string[] = [];
+                        for (let method of servicePolicy.AllowMethods) {
+                            methods.push(`"${method}"`);
+                        }
+                        methods.sort();
+                        builder.appendLine(`{ "${service}", new string[] {${methods.join(', ')}} }${serviceComma}`, serviceIndent + 1);
+                    }
+                }
+                builder.appendLine(`}`, serviceIndent);
+                builder.appendLine(`}`, memberContentIndent);
+                builder.appendLine(`}${memberComma}`, memberIndent);
+            }
+            builder.appendLine(`};`, indent);
+        }
+        emitPolicySets(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`public static IPolicySets __PolicySets = new IPolicySets {`, indent);
+            let keysSize = this.keys.length;
+            let contentIndent = indent + 1;
+            let keyIndex = 0;
+            for (let key of this.keys) {
+                ++keyIndex;
+                let comma = keyIndex < keysSize ? ',' : '';
+                builder.appendLine(`{ "${key}", ${key} }${comma}`, contentIndent);
+            }
+            builder.appendLine(`};`, indent)
         }
     }
 }

@@ -23,15 +23,16 @@ namespace LambdaEntry
         /// <param name="context"></param>
         /// <returns></returns>
         [LambdaSerializer(typeof(JsonSerializer))]
-        public async Task<object> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
         {
-            Console.WriteLine("AWS Lambda Project \"@{project}\".");
+            Console.WriteLine("AWS Lambda Project \"cs-lbd-ws-1\".");
             var websocketService = new WebsocketService();
             // websocketService.RegisterService(new Service());
             await websocketService.ProcessEvent(input);
-            return new {
-                statusCode = 202,
-                body = "Accepted."
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = 202,
+                Body = "Accepted."
             };
         }
     }

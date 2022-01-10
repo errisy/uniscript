@@ -7,9 +7,11 @@ import { SourceFileResovler } from './resolvers';
 import {} from 'ts-expose-internals';
 import { RPC, Target } from './rpc-configuration';
 import * as CSharpWebsocketService from './csharp-websocket-service';
+import * as CSharpWebsocketLambdaService from './csharp-websocket-lambda-service';
 import * as TypeScriptWebsocketAngularClient from './typescript-websocket-angular-client';
 import * as TypeScriptWebsocketLambdaService from './typescript-websocket-lambda-service';
 import * as PythonWebsocketLambdaService from './python-websocket-lambda-service';
+import * as UserCognito from './users-cognito';
 
 function readRPCConfig() {
   let data = fs.readFileSync('uni-rpc.yaml', 'utf-8');
@@ -22,8 +24,16 @@ const resolver = new SourceFileResovler();
 function emitFiles() {
   for(let target of config.rpc) {
     if (typeof target.cs == 'string') {
-      let transpiler = new CSharpWebsocketService.Transpiler(resolver);
-      transpiler.emit(target);
+      switch (target.type) {
+        case 'websocket-service': {
+          let transpiler = new CSharpWebsocketService.Transpiler(resolver);
+          transpiler.emit(target);
+        } break;
+        case 'websocket-lambda-service': {
+          let transpiler = new CSharpWebsocketLambdaService.Transpiler(resolver);
+          transpiler.emit(target);
+        } break;
+      }
     } else if (typeof target.ts == 'string') {
       switch (target.type) {
         case 'websocket-angular-client': {
@@ -42,10 +52,21 @@ function emitFiles() {
           transpiler.emit(target);
         } break;
         case 'lambda-service': {
-
+          
         } break;
         case 'lambda-client': {
 
+        } break;
+        case 'websocket-angular-client': {
+          let transpiler = new TypeScriptWebsocketAngularClient.Transpiler(resolver);
+          transpiler.emit(target);
+        } break;
+      }
+    } else if (typeof target.users == 'string') {
+      switch(target.type) {
+        case 'cognito': {
+          let transpiler = new UserCognito.Transpiler(resolver);
+          transpiler.emit(target);
         } break;
       }
     }

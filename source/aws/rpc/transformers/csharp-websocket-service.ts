@@ -54,6 +54,11 @@ module CodeGeneration {
                 // This is the special case for array.
                 let arrayType = typeInstance.GenericArguments[0];
                 return `${mapType(arrayType, builder)}[]`;
+            } else if (typeInstance.GenericDefinition.Reference.SystemType &&
+                typeInstance.GenericDefinition.Reference.SystemType == 'Promise' &&
+                typeInstance.GenericArguments[0].SystemType &&
+                typeInstance.GenericArguments[0].SystemType == 'void') {
+                return TypeMappings.get('Promise');
             } else {
                 return `${mapType(typeInstance.GenericDefinition, builder)}<${typeInstance.GenericArguments.map(arg => mapType(arg, builder)).join(', ')}>`;
             }
@@ -241,15 +246,22 @@ module CodeGeneration {
             }
             builder.appendLine(`}`, indent);
         }
+        emitReturnType(type: Type, builder: CodeBuilder): string {
+            if (type.Reference && type.Reference.SystemType == 'void') {
+                return 'System.Threading.Tasks.Task';
+            } else {
+                return `System.Threading.Tasks.Task<${this.emitType(type, builder)}>`;
+            }
+        }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
             emitComments(builder, indent, method.Comments, method);
             if (method.IsGeneric) {
                 let genericArugments = method.GenericArguments
                     .map(arg => this.emitType(arg, builder))
                     .join(', ');
-                    builder.appendLine(`public abstract System.Threading.Tasks.Task<${this.emitType(method.ReturnType, builder)}> ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                    builder.appendLine(`public abstract ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             } else {
-                builder.appendLine(`public abstract System.Threading.Tasks.Task<${this.emitType(method.ReturnType, builder)}> ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                builder.appendLine(`public abstract ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             }
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
@@ -284,7 +296,7 @@ module CodeGeneration {
                         .map(parameter => `____${parameter.Name}`)
                         .join(', ');
                 if (method.ReturnType.Reference === VoidType) {
-                    builder.appendLine(`${method.Name}(${parameterNames});`, contentIndent);
+                    builder.appendLine(`await ${method.Name}(${parameterNames});`, contentIndent);
                     builder.appendLine(`break;`, contentIndent);
                 } else {
                     builder.appendLine(`return message.ReturnMessage(await ${method.Name}(${parameterNames}));`, contentIndent);
@@ -395,15 +407,22 @@ module CodeGeneration {
             }
             builder.appendLine(`}`, indent);
         }
+        emitReturnType(type: Type, builder: CodeBuilder): string {
+            if (type.Reference && type.Reference.SystemType == 'void') {
+                return 'System.Threading.Tasks.Task';
+            } else {
+                return `System.Threading.Tasks.Task<${this.emitType(type, builder)}>`;
+            }
+        }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
             emitComments(builder, indent, method.Comments, method);
             if (method.IsGeneric) {
                 let genericArugments = method.GenericArguments
                     .map(arg => this.emitType(arg, builder))
                     .join(', ');
-                    builder.appendLine(`public ${this.emitType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                    builder.appendLine(`public ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             } else {
-                builder.appendLine(`public ${this.emitType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
+                builder.appendLine(`public ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)});`, indent);
             }
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {

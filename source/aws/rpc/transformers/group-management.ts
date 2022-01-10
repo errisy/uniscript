@@ -14,3 +14,10 @@ export class GroupServiceAuthorization {
     AllowAll: boolean;
     AllowMethods: Set<string> = new Set();
 }
+
+export class UserManagement {
+    Name: string;
+    Email: string;
+    PhoneNumber: string;
+    Groups: Map<string, Set<string>> = new Map();
+}

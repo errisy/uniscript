@@ -35,6 +35,12 @@ export function ReadFile(filename: string, encoding?: BufferEncoding): Promise<s
         });
     });
 }
+export function ReadFileSync(filename: string, encoding?: BufferEncoding): string {
+    if (typeof encoding == 'undefined' || encoding.length == 0) {
+        encoding = 'utf8';
+    }
+    return fs.readFileSync(filename, { encoding: encoding });
+}
 export function WriteFile(filename: string, data: string, encoding?: BufferEncoding) {
     if (typeof encoding == 'undefined' || encoding.length == 0) {
         encoding = 'utf8';

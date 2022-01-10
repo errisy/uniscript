@@ -1,0 +1,12 @@
+script:
+  parameters:
+    arg0$: 'websocket'
+    arg1$: 'lambda'
+    arg2$: 'Namespace.Service'
+    websocketProject$@: '@{arg0}'
+    lambdaProject$@: '@{arg1}'
+    service$@: '@{arg2}'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/api
+  steps:
+  - name: run websocket-lambda.ts
+    ts: '@{baseUrl}/websocket-lambda.ts'

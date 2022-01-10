@@ -4,7 +4,7 @@ import { RPC, Target } from './rpc-configuration';
 import { CodeBuilder } from './code-builder';
 import { CopyDirectory, MakeDirectories, Remove, ResolvePath, WriteFile } from './os-utilities';
 import * as path from 'path';
-import { GroupAuthorization, GroupManagement } from 'group-management';
+import { GroupAuthorization, GroupManagement } from './group-management';
 
 export class Transpiler {
     constructor (private resolver: SourceFileResovler) {

@@ -68,83 +68,11 @@ Resources:
           Mutable: false
           Required: true
 
-  # the Administrators Group
-  UserPoolGroupAdministrators:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties: 
-      GroupName: Administrators
-      Description: "The Administrators Group"
-      UserPoolId: !Ref UserPool
-
-  # the Strategists Group
-  UserPoolGroupStrategists:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties: 
-      GroupName: Strategists
-      Description: "The Strategists Group"
-      UserPoolId: !Ref UserPool
-
-  # the Customers Group
-  UserPoolGroupCustomers:
-    Type: AWS::Cognito::UserPoolGroup
-    Properties: 
-      GroupName: Customers
-      Description: "The Customers Group"
-      UserPoolId: !Ref UserPool
-
   UserPoolDomain: 
     Type: AWS::Cognito::UserPoolDomain 
     Properties:
       UserPoolId: !Ref UserPool 
       Domain: !Sub ${Application}-${Project}-login
-
-  UserPoolUserAdmin:
-    Type: AWS::Cognito::UserPoolUser
-    Properties:
-      UserPoolId: !Ref UserPool
-      Username: admin
-      DesiredDeliveryMediums:
-        - EMAIL
-      UserAttributes:
-        - Name: 'name'
-          Value: admin
-        - Name: 'email'
-          Value: '@{primaryEmail}'
-        - Name: phone_number
-          Value: '+61424773274'
-        - Name: email_verified
-          Value: true
-        - Name: phone_number_verified
-          Value: true
-  UserPoolUserGroupAttachmentAdmin:
-    Type: AWS::Cognito::UserPoolUserToGroupAttachment
-    DependsOn: UserPoolUserAdmin
-    Properties: 
-      GroupName: Administrators
-      Username: admin
-      UserPoolId: !Ref UserPool
-
-  UserPoolUserTest:
-    Type: AWS::Cognito::UserPoolUser
-    Properties:
-      UserPoolId: !Ref UserPool
-      Username: test
-      DesiredDeliveryMediums:
-        - EMAIL
-      UserAttributes:
-        - Name: 'name'
-          Value: test
-        - Name: 'email'
-          Value: '@{primaryEmail}'
-        - Name: phone_number
-          Value: '@{primaryPhone}'
-  UserPoolUserGroupAttachmentTest:
-    Type: AWS::Cognito::UserPoolUserToGroupAttachment
-    DependsOn: UserPoolUserTest
-    Properties: 
-      GroupName: Administrators
-      Username: test
-      UserPoolId: !Ref UserPool
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -266,3 +194,81 @@ Resources:
       Roles:
         authenticated: !GetAtt CognitoAuthorizedRole.Arn
         unauthenticated: !GetAtt CognitoUnAuthorizedRole.Arn
+
+# No Manual Change { rpc-users /*
+
+  # the Administrators Group
+  UserPoolGroupAdministrators:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: 
+      GroupName: Administrators
+      Description: "The Administrators Group"
+      UserPoolId: !Ref UserPool
+
+  # the Strategists Group
+  UserPoolGroupStrategists:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: 
+      GroupName: Strategists
+      Description: "The Strategists Group"
+      UserPoolId: !Ref UserPool
+
+  # the Customers Group
+  UserPoolGroupCustomers:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties: 
+      GroupName: Customers
+      Description: "The Customers Group"
+      UserPoolId: !Ref UserPool
+
+  UserPoolUserAdmin:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      UserPoolId: !Ref UserPool
+      Username: admin
+      DesiredDeliveryMediums:
+        - EMAIL
+      UserAttributes:
+        - Name: 'name'
+          Value: admin
+        - Name: 'email'
+          Value: '@{primaryEmail}'
+        - Name: phone_number
+          Value: '@{primaryPhone}'
+        - Name: email_verified
+          Value: true
+        - Name: phone_number_verified
+          Value: true
+
+  UserPoolUserGroupAttachmentAdmin:
+    Type: AWS::Cognito::UserPoolUserToGroupAttachment
+    DependsOn: UserPoolUserAdmin
+    Properties: 
+      GroupName: Administrators
+      Username: admin
+      UserPoolId: !Ref UserPool
+
+  UserPoolUserTest:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      UserPoolId: !Ref UserPool
+      Username: test
+      DesiredDeliveryMediums:
+        - EMAIL
+      UserAttributes:
+        - Name: 'name'
+          Value: test
+        - Name: 'email'
+          Value: '@{primaryEmail}'
+        - Name: phone_number
+          Value: '@{primaryPhone}'
+
+  UserPoolUserGroupAttachmentTest:
+    Type: AWS::Cognito::UserPoolUserToGroupAttachment
+    DependsOn: UserPoolUserTest
+    Properties: 
+      GroupName: Administrators
+      Username: test
+      UserPoolId: !Ref UserPool
+
+# */ rpc-users } No Manual Change

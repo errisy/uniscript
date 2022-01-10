@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.TestUtilities;
+using Amazon.Lambda.APIGatewayEvents;
 
 using LambdaEntry;
 
@@ -14,16 +15,15 @@ namespace LambdaEntry.Tests
     public class FunctionTest
     {
         [Fact]
-        public void TestToUpperFunction()
+        public async void TestApiGatewayFunction()
         {
 
             // Invoke the lambda function and confirm the string was upper cased.
             var function = new Function();
             var context = new TestLambdaContext();
-            var casing = function.FunctionHandler("hello world", context);
-
-            Assert.Equal("hello world", casing.Lower);
-            Assert.Equal("HELLO WORLD", casing.Upper);
+            var request = new APIGatewayProxyRequest();
+            var response = await function.FunctionHandler(request, context);
+            Assert.Equal(202, response.StatusCode);
         }
     }
 }

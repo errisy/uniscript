@@ -45,3 +45,13 @@ declare interface IGroupDescriptor<T> {
 declare class __GroupManager {
     static Set<T>(group: T): IGroupDescriptor<T>;
 }
+
+declare interface IUserDescriptor {
+    Group<T>(group: T): IUserDescriptor;
+    Email(email: string): IUserDescriptor;
+    PhoneNumber(phoneNumber: string): IUserDescriptor;
+}
+
+declare class __UserManager {
+    static Set<T>(username: string): IUserDescriptor; 
+}

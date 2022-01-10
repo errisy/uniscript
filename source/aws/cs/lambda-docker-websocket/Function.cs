@@ -4,7 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Amazon.Lambda.Core;
+using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Serialization.Json;
+
+using UniRpc;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -20,12 +23,17 @@ namespace LambdaEntry
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        public Casing FunctionHandler(string input, ILambdaContext context)
+        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
         {
-            Console.WriteLine("AWS Lambda Project \"@{project}\".");
-            return new Casing(input?.ToLower(), input?.ToUpper());
+            Console.WriteLine("AWS Lambda Project \"cs-lbd-ws-1\".");
+            var websocketService = new WebsocketService();
+            // websocketService.RegisterService(new Service());
+            await websocketService.ProcessEvent(input);
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = 202,
+                Body = "Accepted."
+            };
         }
     }
-
-    public record Casing(string Lower, string Upper);
 }

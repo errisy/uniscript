@@ -24,3 +24,8 @@ enum TesterUserGroups {
 
 __GroupManager.Set(TesterUserGroups.MainTester)
 .AllowServices(MyService.DevService);
+
+__UserManager.Set('admin')
+.Group(ServiceUserGroups.Administrators)
+.Email('jackdatascience@gmail.com')
+.PhoneNumber('+12345678910');

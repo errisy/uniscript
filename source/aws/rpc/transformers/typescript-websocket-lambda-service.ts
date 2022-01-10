@@ -4,7 +4,7 @@ import { RPC, Target } from './rpc-configuration';
 import { CodeBuilder } from './code-builder';
 import { CopyDirectory, MakeDirectories, Remove, ResolvePath, WriteFile } from './os-utilities';
 import * as path from 'path';
-import { GroupAuthorization, GroupManagement } from 'group-management';
+import { GroupAuthorization, GroupManagement } from './group-management';
 
 export class Transpiler {
     constructor (private resolver: SourceFileResovler) {
@@ -564,6 +564,7 @@ module CodeGeneration {
             let filename = path.join(rootDirectory, 'UniRpc/GroupAuthorizationPolicies.ts');
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
+            builder.appendLine(`import { IPolicySets, IGroupPolicySet } from './GroupAuthorizations';`, indent);
             for (let key of this.groups.keys()) {
                 this.keys.push(key);
             }
@@ -581,7 +582,7 @@ module CodeGeneration {
             let memberIndent = indent + 1;
             let memberContentIndent = memberIndent + 1;
             let serviceIndent = memberContentIndent + 1;
-            builder.appendLine(`export const ${group.Name} = {`, indent);
+            builder.appendLine(`export const ${group.Name}: IGroupPolicySet = {`, indent);
             let definedMembers: string[] = [];
             let memberCount = 0;
             for (let member of group.Members) {
@@ -623,7 +624,7 @@ module CodeGeneration {
             builder.appendLine(`};`, indent);
         }
         emitPolicySets(builder: CodeBuilder, indent: number) {
-            builder.appendLine(`export const __PolicySets = {`, indent);
+            builder.appendLine(`export const __PolicySets: IPolicySets = {`, indent);
             let keysSize = this.keys.length;
             let contentIndent = indent + 1;
             let keyIndex = 0;

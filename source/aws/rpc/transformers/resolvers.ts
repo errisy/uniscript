@@ -2,7 +2,7 @@ import {ILocalNameResolver, Namespace, Service, Message, Method, Parameter as Pa
     BooleanType, StringType, FloatType, DoubleType, IntegerType, LongType, BytesType, ListType, DictType, ArrayType, VoidType, ServiceInterface, MessageInterface, PromiseType, AnyType, Enum} from './definitions';
 import * as ts from 'typescript';
 import { SyntaxKindMap } from './SyntaxKindMap';
-import { GroupAuthorization, GroupManagement, GroupServiceAuthorization } from './group-management';
+import { GroupAuthorization, GroupManagement, UserManagement, GroupServiceAuthorization } from './group-management';
 import { ExpressionChainParser, HostVariable, MemberCall, PropertyAccess } from './expression-parser';
 
 export class SourceFileResovler implements ILocalNameResolver {
@@ -13,6 +13,7 @@ export class SourceFileResovler implements ILocalNameResolver {
     PredefinedTypes: Map<string, Type> = new Map();
     private currentSourceFilename: string;
     Groups: Map<string, GroupManagement> = new Map();
+    Users: Map<string, UserManagement> = new Map();
     constructor() {
         this.PredefinedTypes.set('boolean', BooleanType);
         this.PredefinedTypes.set('string', StringType);
@@ -222,6 +223,37 @@ export class SourceFileResovler implements ILocalNameResolver {
                                             serviceAuthorization.AllowMethods.clear();
                                         }
                                     }
+                                } break;
+                            }
+                        }
+                    }
+                } break;
+                case '__UserManager': {
+                    let setMethod = parser.Chain.shift() as MemberCall;
+                    if (setMethod.Name == 'Set') {
+                        let user = setMethod.Arguments[0];
+                        let userManagement = new UserManagement();
+                        userManagement.Name = user[0];
+                        this.Users.set(userManagement.Name, userManagement);
+                        for (let call of parser.Chain) {
+                            let userCall = call as MemberCall;
+                            switch (userCall.Name) {
+                                case 'Group': {
+                                    let group = userCall.Arguments[0];
+                                    let policy = group[0];
+                                    let name = group[1];
+                                    if (!userManagement.Groups.has(policy)) {
+                                        userManagement.Groups.set(policy, new Set());
+                                    }
+                                    userManagement.Groups.get(policy).add(name);
+                                } break;
+                                case 'Email': {
+                                    let email = userCall.Arguments[0];
+                                    userManagement.Email = email[0];
+                                } break;
+                                case 'PhoneNumber': {
+                                    let phoneNumber = userCall.Arguments[0];
+                                    userManagement.PhoneNumber = phoneNumber[0];
                                 } break;
                             }
                         }
@@ -635,8 +667,13 @@ function parseExpressionChain(token: ts.CallExpression | ts.PropertyAccessExpres
     switch(token.kind) {
         case ts.SyntaxKind.CallExpression: {
             for(let argument of token.arguments) {
-                let argumentExpression = resolvePropertyAccessExpression(argument as any);
-                chain.Arguments.push(argumentExpression);
+                if (argument.kind == ts.SyntaxKind.StringLiteral) {
+                    let stringLiterial: ts.StringLiteral = argument as any;
+                    chain.Arguments.push([stringLiterial.text]);
+                } else {
+                    let argumentExpression = resolvePropertyAccessExpression(argument as any);
+                    chain.Arguments.push(argumentExpression);
+                }
             }
             chain.LastKind = ts.SyntaxKind.CallExpression;
             parseExpressionChain(token.expression as any, chain);

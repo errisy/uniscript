@@ -1,13 +1,11 @@
 rpc:
-- cs: '../cs-lbd-1/'
-  type: websocket-service
+- cs: '../cs-lbd-ws-1/'
+  type: websocket-lambda-service
 - ts: '../cdn-ng1/src/app/'
   type: websocket-angular-client
-# - ts: '../lambda-api/'
-#   type: websocket-lambda-service
-- ts: '../ts-lbd-1/'
+- ts: '../ts-lbd-ws-1/'
   type: websocket-lambda-service
-# - ts: '../wsui/src/app/'
-#   type: websocket-angular-client
-- py: '../py-lbd-1/'
+- py: '../py-lbd-ws-1/'
   type: websocket-lambda-service
+- users: '../users'
+  type: cognito

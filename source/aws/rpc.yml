@@ -23,6 +23,13 @@ script:
       - transformers/csharp/websocket-service/WebApplicationExtensions.cs
       - transformers/csharp/websocket-service/WebSocketService.cs
       - transformers/csharp/websocket-service/WebSocketServiceBase.cs
+      - transformers/csharp/websocket-lambda-service/BaseMessage.cs
+      - transformers/csharp/websocket-lambda-service/GroupAuthorizations.cs
+      - transformers/csharp/websocket-lambda-service/LambdaWebsocketTypes.cs
+      - transformers/csharp/websocket-lambda-service/ReturnMessage.cs
+      - transformers/csharp/websocket-lambda-service/WebsocketService.cs
+      - transformers/csharp/websocket-lambda-service/WebsocketServiceBase.cs
+      - transformers/csharp-websocket-lambda-service.ts
       - transformers/csharp-websocket-service.ts
       - transformers/definitions.ts
       - transformers/expression-parser.ts
@@ -47,6 +54,7 @@ script:
       - transformers/tsconfig.json
       - transformers/types.d.ts
       - transformers/typescript/websocket-angular-client/BaseMessage.ts
+      - transformers/typescript/websocket-angular-client/GroupAuthorizations.ts
       - transformers/typescript/websocket-angular-client/local-storage.service.ts
       - transformers/typescript/websocket-angular-client/token-holder.service.ts
       - transformers/typescript/websocket-angular-client/WebsocketService.ts
@@ -61,6 +69,7 @@ script:
       - transformers/typescript-websocket-lambda-service.ts
       - transformers/uni-rpc.json
       - transformers/uni-rpc.yaml
+      - transformers/users-cognito.ts
       - tsconfig.json
       - uni-rpc.yaml
   - name: npm install

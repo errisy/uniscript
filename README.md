@@ -99,6 +99,11 @@ This requires [@angular/cli](https://www.npmjs.com/package/@angular/cli)
 ```bash
 us aws/cdn/angular [project-name]
 ```
+### Update ApiGateway Websocket API and Cognito Login URL for Angular
+This will update the environment.ts and environment.*.ts files.
+```bash
+us aws/cdn/angular-update [angular-project-name] [aws-profile-name] [users-project-name] [websocket-project-name] [environment-name]
+```
 
 ## AWS Users
 ### Users
@@ -108,13 +113,26 @@ us aws/users
 ```
 
 ## AWS API
-## JWT Layer
+### JWT Layer
 JWT Layer is required for Websocket, install it first before using the following API projects. JWT Layer is a nodejs layer.
 ```bash
 us aws/api/jwt-layer
 ```
-## Websocket
+### Websocket
 Create a Websocket project
 ```bash
 us aws/api/websocket [project-name]
 ```
+### Integrate Lambda to Websocket API
+Add Lambda Integration to ApiGateway Websocket API.
+```bash
+us aws/api/websocket-lambda [websocket-project-name] [lambda-websocket-project-name] [namespace.service]
+```
+Where *namespace.service* is the service name from RPC
+## RPC
+### Create RPC Project
+RPC project defines the data contracts and APIs between frontends and backends.
+```bash
+us aws/rpc [rpc-project-name]
+```
+in the *uni-rpc.yml* file, the **users** type can be emitted to the "Users" project to update the cloudformation.yml file.

@@ -1,15 +1,15 @@
 import { __PolicySets } from './GroupAuthorizationPolicies';
 
-interface IGroupPolicy {
+export interface IGroupPolicy {
     Name: string;
     Services: {[service: string]: string | string[]};
 }
 
-interface IGroupPolicySet {
+export interface IGroupPolicySet {
     [group: string]: IGroupPolicy;
 }
 
-interface IPolicySets {
+export interface IPolicySets {
     [policy: string]: IGroupPolicySet;
 }
 
@@ -19,8 +19,8 @@ export function GroupAuthorizations(policy: string, group: string, service: stri
     let groupPolicySet: IGroupPolicySet = __PolicySets[policy];
     if (!groupPolicySet[group]) return false;
     let groupPolicy: IGroupPolicy = groupPolicySet[group];
-    if (!groupPolicy[service]) return false;
-    let servicePolicy: string | string[] = groupPolicy[service];
+    if (!groupPolicy.Services || !groupPolicy.Services[service]) return false;
+    let servicePolicy: string | string[] = groupPolicy.Services[service];
     if (typeof servicePolicy == 'string' && servicePolicy == '*') {
         return true;
     }

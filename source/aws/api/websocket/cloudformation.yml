@@ -107,7 +107,7 @@ Resources:
     Properties:
       Name: !Sub ${Application}--${Project}--${EnvironmentTarget}--websocket
       ProtocolType: WEBSOCKET
-      RouteSelectionExpression: "$request.body.action"
+      RouteSelectionExpression: "$request.body.Service"
   ConnectIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -221,3 +221,7 @@ Resources:
       KeySchema: 
         - AttributeName: "Username"
           KeyType: "HASH"  
+
+# No Manual Change { websocket-lambda-integration /*
+
+# */ websocket-lambda-integration } No Manual Change

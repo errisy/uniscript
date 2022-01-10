@@ -4,6 +4,7 @@ import { RPC, Target } from './rpc-configuration';
 import { CodeBuilder } from './code-builder';
 import { CopyDirectory, MakeDirectories, Remove, ResolvePath, WriteFile } from './os-utilities';
 import * as path from 'path';
+import { GroupAuthorization, GroupManagement } from './group-management';
 
 export class Transpiler {
     constructor (private resolver: SourceFileResovler) {
@@ -18,6 +19,10 @@ export class Transpiler {
                     Remove(topLevelNamespacePath);
                     CodeGeneration.AsEmitter(instance).emitFiles(rootDirectory);
                 }
+            }
+            if (this.resolver.Groups && this.resolver.Groups.size > 0) {
+                let groups = new CodeGeneration.GroupAuthorizationsEmitter(this.resolver.Groups);
+                groups.emitFile(rootDirectory);
             }
         }
     }
@@ -542,6 +547,70 @@ module CodeGeneration {
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
             return CodeGeneration.mapType(typeInstance, builder, this.instance.Fullname);
+        }
+    }
+
+    export class GroupAuthorizationsEmitter {
+        keys: string[] = [];
+        constructor (private groups: Map<string, GroupManagement>) {}
+        emitFile(rootDirectory: string){
+            let filename = path.join(rootDirectory, 'UniRpc/GroupAuthorizationPolicies.ts');
+            let builder: CodeBuilder = new CodeBuilder(importBuilder);
+            let indent = 0;
+            builder.appendLine(`import { Router } from '@angular/router';`, indent);
+            builder.appendLine(`import { GuardBase } from './GroupAuthorizations';`, indent);
+            builder.appendLine(`import { TokenHolder } from './token-holder.service';`, indent);
+            builder.appendLine(`import { Injectable } from "@angular/core";`, indent);
+            for (let key of this.groups.keys()) {
+                this.keys.push(key);
+            }
+            this.keys.sort();
+            for (let key of this.keys) {
+                let group = this.groups.get(key);
+                this.emitGroupPolicy(builder, indent, group);
+            }
+            this.emitPolicySets(builder, indent);
+            console.log('Write Code to:', filename);
+            WriteFile(filename, builder.build(), 'utf-8');
+        }
+        emitGroupPolicy(builder: CodeBuilder, indent: number, group: GroupManagement) {
+            builder.appendLine(`export enum ${group.Name} {`, indent)
+            ++indent;
+            for (let member of group.Members) {
+                builder.appendLine(`${member} = '${member}',`, indent)
+            }
+            --indent;
+            builder.appendLine(`}`, indent);
+            builder.appendLine(`export module ${group.Name} {`, indent);
+            ++indent;
+            for (let member of group.Members) {
+                builder.appendLine(`@Injectable({providedIn: 'root'})`, indent);
+                builder.appendLine(`export class ${member}Guard extends GuardBase {`, indent);
+                ++indent;
+                builder.appendLine(`Name: string = '${group.Name}.${member}';`, indent);
+                builder.appendLine(`constructor(public token: TokenHolder, public router: Router) {`, indent);
+                builder.appendLine(`super(token, router);`, indent + 1);
+                builder.appendLine(`}`, indent);
+                builder.appendLine(`check = () => {`, indent);
+                builder.appendLine(`return (this.token.Access && (this.token.Expires >= Date.now()) && this.token.Groups.includes(this.Name)) ? true : false;`, indent + 1);
+                builder.appendLine(`};`, indent);
+                --indent;
+                builder.appendLine(`}`, indent);
+            }
+            --indent;
+            builder.appendLine(`}`, indent);
+        }
+        emitPolicySets(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`export const __PolicySets = {`, indent);
+            let keysSize = this.keys.length;
+            let contentIndent = indent + 1;
+            let keyIndex = 0;
+            for (let key of this.keys) {
+                ++keyIndex;
+                let comma = keyIndex < keysSize ? ',' : '';
+                builder.appendLine(`${key}: ${key}${comma}`, contentIndent);
+            }
+            builder.appendLine(`};`, indent)
         }
     }
 }

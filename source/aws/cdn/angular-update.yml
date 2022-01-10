@@ -1,0 +1,38 @@
+script:
+# users UserPool UserPoolClient websocket-api LambdaWebSocket
+  parameters:
+    AzDevEnv+: az-dev-env.yml
+    arg0$: '~'
+    angularStack$@: '@{arg0}'
+    arg1$: '[profile]'
+    profile$@: '@{arg1}'
+    arg2$: 'users'
+    usersStack$@: '@{arg2}'
+    arg3$: 'websocket'
+    apiGatewayStack$@: '@{arg3}'
+    arg4$: 'staging'
+    environment$@: '@{arg4}'
+    AzEnvironment+: az-env.@{arg4}.yml
+    # The followings are cloudformation resource keys
+    arg5$: 'UserPool'
+    userPool$@: '@{arg5}'
+    arg6$: 'UserPoolClient'
+    userPoolClient$@: '@{arg6}'
+    arg7$: 'LambdaWebSocket'
+    apiGateway$@: '@{arg7}'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/cdn
+  steps:
+  - name: get aws region
+    cmd: 'aws configure get region --profile @{profile}'
+    post: $['awsProfileRegion'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws access key id
+    cmd: 'aws configure get aws_access_key_id --profile @{profile}'
+    post: $['awsAccessKeyId'] = /[\w_\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws access secret key
+    cmd: 'aws configure get aws_secret_access_key --profile @{profile}'
+    post: $['awsAccessSecretKey'] = /[\w_\+\-\/\.]+/ig.exec($['__command_output__'])[0];
+  - name: get aws caller identity
+    cmd: 'aws sts get-caller-identity --profile @{profile} --region @{awsProfileRegion} --output text'
+    post: $['awsAccountId'] = /^\s*(\d{12})/ig.exec($['__command_output__'])[1];
+  - name: run angular-update.ts
+    ts: '@{baseUrl}/angular-update.ts'

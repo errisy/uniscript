@@ -12,6 +12,9 @@ script:
       destination: '@{project}/'
       copy:
       - cloudformation.yml
+      - tsconfig.json
+      - src/environments/environment.prod.ts
+      - src/environments/environment.ts
       format:
       - pipeline.yml
   - name: git sync

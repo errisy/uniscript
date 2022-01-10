@@ -42,7 +42,7 @@ class WebsocketService:
         if message.Service in self.services.keys():
             service = self.services.get(message.Service)
             result = await service.__invoke(message)
-            self.Respond(event.requestContext, result);
+            self.Respond(event.requestContext, result)
             return {
                 'statusCode': 202,
                 'body': 'Accepted'
@@ -86,7 +86,7 @@ class WebsocketService:
             'Success': False,
             'ErrorMessage': 'Unauthorzied'
         }
-        self.Respond(event.requestContext, response);
+        self.Respond(event.requestContext, response)
 
     def Respond(self, context: IRequestContext, data: any):
         agm = boto3.client(

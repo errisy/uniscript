@@ -9,7 +9,11 @@ __GroupManager.Set(ServiceUserGroups.Administrators)
     MyService.DevService.prototype.AB,
     MyService.MXU.prototype.resolve
     )
-.AllowServices(MyService.DevService);
+.AllowServices(MyService.DevService)
+.AllowServices(
+    TsService.TsTestService,
+    PyService.PyTestService
+);
 
 __GroupManager.Set(ServiceUserGroups.Users)
 .AllowServices(MyService.MXU);

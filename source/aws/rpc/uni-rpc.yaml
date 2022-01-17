@@ -8,4 +8,4 @@ rpc:
 - py: '../py-lbd-ws-1/'
   type: websocket-lambda-service
 - users: '../users'
-  type: cognito
+  type: cognitox

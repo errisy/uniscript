@@ -1,5 +1,6 @@
 script:
 # users UserPool UserPoolClient websocket-api LambdaWebSocket
+# us aws/cdn/angular-update [angular-project] [aws-profile-name] [users-projects] [websocket-project] [environment-name] [user-pool-resource-key] [user-pool-client-resource-key] [api-gateway-resouce-key]
   parameters:
     AzDevEnv+: az-dev-env.yml
     arg0$: '~'

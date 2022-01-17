@@ -5,6 +5,7 @@ script:
     helperProject$: 'aws-devops-helper'
     utilsProject$: 'cloudformation-utils'
     cloudformationProject$: 'cloudformation-api'
+    apigatewayCloudwatchProject$: 'apigateway-cloudwatch'
     cloudfrontProject$: 'cloudfront-api'
     s3Project$: 's3-api'
   steps:
@@ -13,6 +14,8 @@ script:
       source: "@{baseUrl}"
       destination: ''
       copy:
+      - apigateway-cloudwatch/cloudformation.yml
+      - apigateway-cloudwatch/pipeline.yml
       - aws-devops-helper/cloudformation.yml
       - aws-devops-helper/lambda.ts
       - aws-devops-helper/package-lock.json
@@ -56,6 +59,9 @@ script:
     ignoreError: True
   - name: create pipeline @{cloudformationProject}
     cmd: az pipelines create --name @{cloudformationProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{cloudformationProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
+    ignoreError: True
+  - name: create pipeline @{apigatewayCloudwatchProject}
+    cmd: az pipelines create --name @{apigatewayCloudwatchProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{apigatewayCloudwatchProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}
     ignoreError: True
   - name: create pipeline @{cloudfrontProject}
     cmd: az pipelines create --name @{cloudfrontProject} --repository-type tfsgit --repository @{azureDevOpsRepository} --branch @{gitBranchName} --yaml-path @{cloudfrontProject}/pipeline.yml --organization https://dev.azure.com/@{azureDevOpsOrganization}/ --project @{azureDevOpsProject}

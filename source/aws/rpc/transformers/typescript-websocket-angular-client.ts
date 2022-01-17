@@ -561,6 +561,7 @@ module CodeGeneration {
             builder.appendLine(`import { GuardBase } from './GroupAuthorizations';`, indent);
             builder.appendLine(`import { TokenHolder } from './token-holder.service';`, indent);
             builder.appendLine(`import { Injectable } from "@angular/core";`, indent);
+            this.emitAnyGroupPolicy(builder, indent);
             for (let key of this.groups.keys()) {
                 this.keys.push(key);
             }
@@ -573,6 +574,19 @@ module CodeGeneration {
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
+        emitAnyGroupPolicy(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`@Injectable({providedIn: 'root'})`, indent);
+            builder.appendLine(`export class __AnyGroupGuard extends GuardBase {`, indent);
+            ++indent;
+            builder.appendLine(`constructor(public token: TokenHolder, public router: Router) {`, indent);
+            builder.appendLine(`super(token, router);`, indent + 1);
+            builder.appendLine(`}`, indent);
+            builder.appendLine(`check = () => {`, indent);
+            builder.appendLine(`return (this.token.Access && (this.token.Expires >= Date.now()) && this.token.Groups.length > 0) ? true : false;`, indent + 1);
+            builder.appendLine(`};`, indent);
+            --indent;
+            builder.appendLine(`}`, indent);
+        }
         emitGroupPolicy(builder: CodeBuilder, indent: number, group: GroupManagement) {
             builder.appendLine(`export enum ${group.Name} {`, indent)
             ++indent;
@@ -583,6 +597,20 @@ module CodeGeneration {
             builder.appendLine(`}`, indent);
             builder.appendLine(`export module ${group.Name} {`, indent);
             ++indent;
+            {
+                builder.appendLine(`@Injectable({providedIn: 'root'})`, indent);
+                builder.appendLine(`export class __AnyGuard extends GuardBase {`, indent);
+                ++indent;
+                builder.appendLine(`Name: string = '${group.Name}.';`, indent);
+                builder.appendLine(`constructor(public token: TokenHolder, public router: Router) {`, indent);
+                builder.appendLine(`super(token, router);`, indent + 1);
+                builder.appendLine(`}`, indent);
+                builder.appendLine(`check = () => {`, indent);
+                builder.appendLine(`return (this.token.Access && (this.token.Expires >= Date.now()) && this.token.Groups.reduce((value, group) => value || group.startsWith(this.Name), false)) ? true : false;`, indent + 1);
+                builder.appendLine(`};`, indent);
+                --indent;
+                builder.appendLine(`}`, indent);
+            }
             for (let member of group.Members) {
                 builder.appendLine(`@Injectable({providedIn: 'root'})`, indent);
                 builder.appendLine(`export class ${member}Guard extends GuardBase {`, indent);

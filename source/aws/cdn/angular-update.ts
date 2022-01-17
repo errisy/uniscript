@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 interface IEnvironmentData {
-    webSocketUri: string;
+    webSocketOptions: {[Service: string]: string};
     authUri: string;
     clientId: string;
 }
@@ -103,7 +103,9 @@ async function updateAngularEnvironments(angularProjectName: string,
             let dict = script.substring(start, end + 1);
             let data: IEnvironmentData = eval(`(${dict})`);
             // console.log('data:', data);
-            data.webSocketUri = `wss://${apiGatewayPhysicalId}.execute-api.${region}.amazonaws.com/prod`;
+            data.webSocketOptions = {
+                __default: `wss://${apiGatewayPhysicalId}.execute-api.${region}.amazonaws.com/prod`
+            };
             data.authUri = `https://${application}-${usersProjectName}-login.auth.${region}.amazoncognito.com`
             data.clientId = userPoolClientPhysicalId;
             // console.log('beautify:', beautify(data));

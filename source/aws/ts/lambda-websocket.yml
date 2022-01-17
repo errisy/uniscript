@@ -6,6 +6,11 @@ script:
     arg1$: 'websocket'
     project$@: '@{arg0}'
     websocketproject$@: '@{arg1}'
+    arg2$: 'Namespace.Server'
+    lambdaProject$@: '@{arg0}'
+    websocketProject$@: '@{arg1}'
+    service$@: '@{arg2}'
+    apiBaseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/api
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
@@ -29,6 +34,8 @@ script:
       - pipeline.yml
       - package.json
       - use_env.ts
+  - name: run websocket-lambda.ts
+    ts: '@{apiBaseUrl}/websocket-lambda.ts'
   - name: npm install
     cmd: cd @{project} && npm i && cd ..
     bash: cd @{project} ; npm i ; cd ..

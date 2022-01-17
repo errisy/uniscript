@@ -28,7 +28,7 @@ variables:
 - name: project
   value: '@{project}'
 - name: websocketproject
-  value: '@{websocket}'
+  value: '@{websocketproject}'
 
 pool:
   vmImage: 'ubuntu-latest'

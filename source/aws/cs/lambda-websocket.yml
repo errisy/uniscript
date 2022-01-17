@@ -6,6 +6,11 @@ script:
     arg1$: 'websocket'
     project$@: '@{arg0}'
     websocketproject$@: '@{arg1}'
+    arg2$: 'Namespace.Server'
+    lambdaProject$@: '@{arg0}'
+    websocketProject$@: '@{arg1}'
+    service$@: '@{arg2}'
+    apiBaseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/api
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'
@@ -32,6 +37,8 @@ script:
       - Function.cs
       - FunctionTest.cs
       - pipeline.yml
+  - name: run websocket-lambda.ts
+    ts: '@{apiBaseUrl}/websocket-lambda.ts'
   - name: git sync
     cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
     ignoreError: True

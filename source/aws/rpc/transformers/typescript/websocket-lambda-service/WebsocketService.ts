@@ -29,7 +29,8 @@ export class WebsocketService {
       };
     }
     let message: BaseMessage = JSON.parse(event.body);
-    if (!GroupClausesAuthorize(this.user.Groups.S, message.Service, message.Method)) {
+    let groups: string[] = JSON.parse(this.user.Groups.S);
+    if (!GroupClausesAuthorize(groups, message.Service, message.Method)) {
       return {
         statusCode: 401,
         body: 'Unauthorized'

@@ -34,10 +34,10 @@ namespace UniRpc
             return false;
         }
 
-        public static bool GroupClausesAuthorize(string groups, string service, string method)
+        public static bool GroupClausesAuthorize(string[] groups, string service, string method)
         {
-            if (groups.GetType() != typeof(string)) return false;
-            foreach (var groupClause in groups.Split(",", System.StringSplitOptions.RemoveEmptyEntries))
+            if (groups.GetType() != typeof(string[])) return false;
+            foreach (var groupClause in groups)
             {
                 var sections = groupClause.Split('.');
                 var policy = sections[0];

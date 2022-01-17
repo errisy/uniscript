@@ -8,12 +8,13 @@ from UniRpc.WebsocketService import WebsocketService
 
 async def websocket_handler(event: IWebsocketEvent):
     websocketService: WebsocketService = WebsocketService()
+    # register your service implementations here
+    # websocketService.RegisterService(Namespace.ServiceImpl())
     await websocketService.ProcessEvent(event)
 
 
 def handler(event: IWebsocketEvent, context: Dict[str, any] = None):
-    asyncio.run(websocket_handler(event))
-    return {'status': 200}
+    return asyncio.run(websocket_handler(event))
 
 
 if __name__ == '__main__':

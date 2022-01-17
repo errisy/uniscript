@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any
+from typing import Dict, Any, List
 import json
 import boto3
 import os
@@ -34,7 +34,8 @@ class WebsocketService:
                 'body': 'Unauthorized'
             }
         message: BaseMessage = json.loads(event.body)
-        if not GroupClausesAuthorize(self.user.Groups.S, message.Service, message.Method):
+        groups: List[str] = json.loads(self.user.Groups.S)
+        if not GroupClausesAuthorize(groups, message.Service, message.Method):
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'
@@ -42,7 +43,7 @@ class WebsocketService:
         if message.Service in self.services.keys():
             service = self.services.get(message.Service)
             result = await service.__invoke(message)
-            self.Respond(event.requestContext, result);
+            self.Respond(event.requestContext, result)
             return {
                 'statusCode': 202,
                 'body': 'Accepted'
@@ -86,7 +87,7 @@ class WebsocketService:
             'Success': False,
             'ErrorMessage': 'Unauthorzied'
         }
-        self.Respond(event.requestContext, response);
+        self.Respond(event.requestContext, response)
 
     def Respond(self, context: IRequestContext, data: any):
         agm = boto3.client(

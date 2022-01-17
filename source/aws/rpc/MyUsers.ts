@@ -12,7 +12,11 @@ __GroupManager.Set(ServiceUserGroups.Administrators)
 .AllowServices(MyService.DevService)
 .AllowServices(
     TsService.TsTestService,
-    PyService.PyTestService
+    TsService.TsDockerService,
+    PyService.PyTestService,
+    PyService.PyDockerService,
+    CsService.CsTestService,
+    CsService.CsDockerService
 );
 
 __GroupManager.Set(ServiceUserGroups.Users)

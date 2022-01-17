@@ -31,10 +31,10 @@ def GroupAuthorizations(policy: str, group: str, service: str, method: str) -> b
     return False
 
 
-def GroupClausesAuthorize(groups: str, service: str, method: str) -> bool:
-    if not isinstance(groups, str):
+def GroupClausesAuthorize(groups: List[str], service: str, method: str) -> bool:
+    if not isinstance(groups, list):
         return False
-    for groupClause in groups.split(','):
+    for groupClause in groups:
         sections = groupClause.split('.')
         policy = sections[0]
         group = sections[1]

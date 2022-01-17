@@ -6,11 +6,9 @@ import { WebsocketService } from './UniRpc/WebsocketService';
 export async function handler (event: IWebsocketEvent) {
     console.log('AWS Lambda Project "@{project}".');
     let websocketService = new WebsocketService();
-    await websocketService.ProcessEvent(event);
-    return {
-        statusCode: 202,
-        body: 'Accepted.'
-    };
+    // Register your service implementations here.
+    // websocketService.RegisterService(new Namespace.ServiceImpl());
+    return await websocketService.ProcessEvent(event);
 };
 
 // Entry point fo the process

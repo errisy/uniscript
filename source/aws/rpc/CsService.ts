@@ -1,4 +1,4 @@
-namespace PyService {
+namespace CsService {
     export class Request {
         name: string;
         age: integer;
@@ -9,13 +9,13 @@ namespace PyService {
         age: integer;
     }
 
-    export abstract class PyTestService {
+    export abstract class CsTestService {
         abstract test(message: string): string;
         abstract sendNumber(value: long): long;
         abstract sendRequest(request: Request): Response;
     }
 
-    export abstract class PyDockerService {
+    export abstract class CsDockerService {
         abstract test(message: string): string;
         abstract sendNumber(value: long): long;
         abstract sendRequest(request: Request): Response;

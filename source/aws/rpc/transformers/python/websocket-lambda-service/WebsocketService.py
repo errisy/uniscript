@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any
+from typing import Dict, Any, List
 import json
 import boto3
 import os
@@ -34,7 +34,8 @@ class WebsocketService:
                 'body': 'Unauthorized'
             }
         message: BaseMessage = json.loads(event.body)
-        if not GroupClausesAuthorize(self.user.Groups.S, message.Service, message.Method):
+        groups: List[str] = json.loads(self.user.Groups.S)
+        if not GroupClausesAuthorize(groups, message.Service, message.Method):
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'

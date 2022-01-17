@@ -30,9 +30,9 @@ export function GroupAuthorizations(policy: string, group: string, service: stri
     return false;
 }
 
-export function GroupClausesAuthorize(groups: string, service: string, method: string) {
-    if (typeof groups != 'string') return false;
-    for (let groupClause of groups.split(',')) {
+export function GroupClausesAuthorize(groups: string[], service: string, method: string) {
+    if (!Array.isArray(groups)) return false;
+    for (let groupClause of groups) {
         let sections = groupClause.split('.');
         let policy = sections[0], group = sections[1];
         if (GroupAuthorizations(policy, group, service, method)) return true;

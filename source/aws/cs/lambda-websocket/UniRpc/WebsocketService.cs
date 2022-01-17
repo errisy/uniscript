@@ -39,7 +39,7 @@ namespace UniRpc
             return this;
         }
 
-        public async Task<object> ProcessEvent(APIGatewayProxyRequest _event)
+        public async Task<APIGatewayProxyResponse> ProcessEvent(APIGatewayProxyRequest _event)
         {
             try
             {
@@ -48,17 +48,20 @@ namespace UniRpc
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-                return new {
-                    statusCode = 401,
-                    body = "Unauthorized"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 401,
+                    Body = "Unauthorized."
                 };
             }
             BaseMessage message  = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
-            if (!Static.GroupClausesAuthorize(user[IWebSocketUser.Groups].S, message.Service, message.Method))
+            string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
+            if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
-                return new {
-                    statusCode = 401,
-                    body = "Unauthorized"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 401,
+                    Body = "Unauthorized"
                 };
             }
             if (services.ContainsKey(message.Service))
@@ -66,14 +69,16 @@ namespace UniRpc
                 var service = services[message.Service];
                 var result = await service.__invoke(message);
                 await Respond(_event.RequestContext, result);
-                return new {
-                    statusCode = 202,
-                    body = "Accepted"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 202,
+                    Body = "Accepted"
                 };
             }
-            return new {
-                statusCode = 403,
-                body = "Forbidden"
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = 403,
+                Body = "Forbidden"
             };
         }
 

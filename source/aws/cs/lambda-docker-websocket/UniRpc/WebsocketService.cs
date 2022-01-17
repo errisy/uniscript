@@ -39,7 +39,7 @@ namespace UniRpc
             return this;
         }
 
-        public async Task<object> ProcessEvent(APIGatewayProxyRequest _event)
+        public async Task<APIGatewayProxyResponse> ProcessEvent(APIGatewayProxyRequest _event)
         {
             try
             {
@@ -48,17 +48,20 @@ namespace UniRpc
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-                return new {
-                    statusCode = 401,
-                    body = "Unauthorized"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 401,
+                    Body = "Unauthorized."
                 };
             }
-            BaseMessage message  = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
-            if (!Static.GroupClausesAuthorize(user[IWebSocketUser.Groups].S, message.Service, message.Method))
+            BaseMessage message = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
+            string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
+            if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
-                return new {
-                    statusCode = 401,
-                    body = "Unauthorized"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 401,
+                    Body = "Unauthorized"
                 };
             }
             if (services.ContainsKey(message.Service))
@@ -66,20 +69,24 @@ namespace UniRpc
                 var service = services[message.Service];
                 var result = await service.__invoke(message);
                 await Respond(_event.RequestContext, result);
-                return new {
-                    statusCode = 202,
-                    body = "Accepted"
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 202,
+                    Body = "Accepted"
                 };
             }
-            return new {
-                statusCode = 403,
-                body = "Forbidden"
+            return new APIGatewayProxyResponse
+            {
+                StatusCode = 403,
+                Body = "Forbidden"
             };
         }
 
-        public async Task<Dictionary<string, AttributeValue>> GetUser(APIGatewayProxyRequest.ProxyRequestContext context) {
+        public async Task<Dictionary<string, AttributeValue>> GetUser(APIGatewayProxyRequest.ProxyRequestContext context)
+        {
             var connectionResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest {
+                new GetItemRequest
+                {
                     TableName = Static.WebSocketConnectionsTable,
                     Key = new Dictionary<string, AttributeValue> {
                     { "ConnectionId", new AttributeValue { S = context.ConnectionId } }
@@ -91,7 +98,8 @@ namespace UniRpc
             }
             Dictionary<string, AttributeValue> connection = connectionResponse.Item;
             var userResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest {
+                new GetItemRequest
+                {
                     TableName = Static.WebSocketUsersTable,
                     Key = new Dictionary<string, AttributeValue> {
                         {  "Username", new AttributeValue{ S = connection[IWebSocketUser.Username].S } }
@@ -104,7 +112,8 @@ namespace UniRpc
             return userResponse.Item;
         }
 
-        public async Task RespondUnauthorized(APIGatewayProxyRequest _event, BaseMessage message) {
+        public async Task RespondUnauthorized(APIGatewayProxyRequest _event, BaseMessage message)
+        {
             BaseMessage response = new BaseMessage();
             response.Id = message.Id;
             response.Service = message.Service;
@@ -114,7 +123,8 @@ namespace UniRpc
             await Respond(_event.RequestContext, response);
         }
 
-        public async Task Respond(APIGatewayProxyRequest.ProxyRequestContext context, object data) {
+        public async Task Respond(APIGatewayProxyRequest.ProxyRequestContext context, object data)
+        {
             var agm = new AmazonApiGatewayManagementApiClient(
                 new AmazonApiGatewayManagementApiConfig()
                 {

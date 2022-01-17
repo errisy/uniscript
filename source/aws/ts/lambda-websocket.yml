@@ -2,7 +2,10 @@ script:
   parameters:
     AzDevEnv+: az-dev-env.yml
     baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/ts/lambda-websocket/
+    arg0$: 'lbd-ws'
+    arg1$: 'websocket'
     project$@: '@{arg0}'
+    websocketproject$@: '@{arg1}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'

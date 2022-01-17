@@ -27,6 +27,8 @@ variables:
   value: '$(Build.BuildId)'
 - name: project
   value: '@{project}'
+- name: websocketproject
+  value: '@{websocketproject}'
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -109,6 +111,7 @@ steps:
         {"ParameterKey":"Application", "ParameterValue":"$(Application)"},
         {"ParameterKey":"Version", "ParameterValue":"$(Version)"},
         {"ParameterKey":"Project", "ParameterValue":"$(project)"},
+        {"ParameterKey":"WebSocketProject", "ParameterValue":"$(websocketproject)"},
         {"ParameterKey":"EnvironmentTarget", "ParameterValue":"$(EnvironmentTarget)"},
         {"ParameterKey":"Runtime", "ParameterValue":"$(LambdaRuntimePython)"},
         {"ParameterKey":"BuildId", "ParameterValue":"$(Build.BuildId)"},

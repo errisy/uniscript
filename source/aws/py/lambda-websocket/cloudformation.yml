@@ -9,6 +9,8 @@ Parameters:
     Type: String
   Project:
     Type: String
+  WebSocketProject:
+    Type: String
   EnvironmentTarget:
     Type: String
   Runtime:
@@ -54,9 +56,10 @@ Resources:
       #         InputString: !Sub 'ProjectLayer@${Application}--[project-name]--${AWSRegion}--${EnvironmentTarget}'
       #         Operation: Stack
     # Add Environment Variables here
-    #   Environment:
-    #     Variables:
-    #       VariableName: !Sub '${variable}-value'
+      Environment:
+        Variables:
+          WebSocketConnectionsTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-connections
+          WebSocketUsersTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-users
 
   # Allow ApiGateway to Invoke Lambda
   ApiGatewayInvokePermission:

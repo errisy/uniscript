@@ -9,6 +9,8 @@ Parameters:
     Type: String
   Project:
     Type: String
+  WebSocketProject:
+    Type: String
   EnvironmentTarget:
     Type: String
   Runtime:
@@ -61,9 +63,10 @@ Resources:
       MemorySize: 1024
       Role: !GetAtt LambdaRole.Arn
       Timeout: 60
-      # Environment:
-      #   Variables:
-      #     Key: Value
+      Environment:
+        Variables:
+          WebSocketConnectionsTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-connections
+          WebSocketUsersTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-users
 
   ApiGatewayInvokePermission:
     Type: AWS::Lambda::Permission

@@ -36,6 +36,7 @@ script:
       - pipeline.yml
       - docker-build.cmd
       - docker-build.sh
+      - use_env.py
   - name: run websocket-lambda.ts
     ts: '@{apiBaseUrl}/websocket-lambda.ts'
   - name: npm install

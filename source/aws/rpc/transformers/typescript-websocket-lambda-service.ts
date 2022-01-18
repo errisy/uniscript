@@ -550,7 +550,7 @@ module CodeGeneration {
         }
         emitProperty(builder: CodeBuilder, indent: number, property: Property) {
             emitComments(builder, indent, property.Comments);
-            builder.appendLine(`public ${property.Name}: ${this.emitType(property.Type, builder)};`, indent);
+            builder.appendLine(`${property.Name}: ${this.emitType(property.Type, builder)};`, indent);
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
             return CodeGeneration.mapType(typeInstance, builder, this.instance.Fullname);

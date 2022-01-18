@@ -15,6 +15,7 @@ script:
       - MyService1.ts
       - MyService2.ts
       - MyUsers.ts
+      - CsService.ts
       - PyService.ts
       - TsService.ts
       - package.json

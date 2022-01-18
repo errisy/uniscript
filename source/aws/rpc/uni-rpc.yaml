@@ -5,7 +5,11 @@ rpc:
   type: websocket-angular-client
 - ts: '../ts-lbd-ws-1/'
   type: websocket-lambda-service
+- ts: '../ts-lbdc-ws-1/'
+  type: websocket-lambda-service
 - py: '../py-lbd-ws-1/'
+  type: websocket-lambda-service
+- py: '../py-lbdc-ws-1/'
   type: websocket-lambda-service
 - users: '../users'
   type: cognitox

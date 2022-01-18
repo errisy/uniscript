@@ -1,5 +1,5 @@
 from typing import TypedDict, Union, List, Dict
-from GroupAuthorizationPolicies import __PolicySets
+from UniRpc.GroupAuthorizationPolicies import __PolicySets
 
 
 class IGroupPolicy(TypedDict):

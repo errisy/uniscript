@@ -4,10 +4,10 @@ import json
 import boto3
 import os
 
-from WebsocketServiceBase import WebsocketServiceBase
-from LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
-from BaseMessage import BaseMessage
-from GroupAuthorizations import GroupClausesAuthorize
+from UniRpc.WebsocketServiceBase import WebsocketServiceBase
+from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
+from UniRpc.BaseMessage import BaseMessage
+from UniRpc.GroupAuthorizations import GroupClausesAuthorize
 
 
 WebSocketConnectionsTable = os.getenv('WebSocketConnectionsTable')

@@ -32,16 +32,10 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: |
-    rm -rf $(project)/src
-    rm -rf $(project)/dist
-    mkdir $(project)/src
-    cp -a $(project)/. $(project)/src/
-  displayName: Delete the python files and packages
 - task: ArchiveFiles@2
   displayName: Pack the files into zip package
   inputs:
-    rootFolderOrFile: '$(project)/src/'
+    rootFolderOrFile: '$(project)/'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(project)/dist/lambda.zip'

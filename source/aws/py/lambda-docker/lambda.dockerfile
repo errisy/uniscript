@@ -7,7 +7,7 @@ RUN yum -y update
 RUN pip install --use-feature=2020-resolver awslambdaric boto3 boto3_type_annotations pandas pyarrow s3fs requests beautifulsoup4
 
 # copy all python files
-COPY *.py ./
+COPY . .
 
 # RUN python delete-folder.py --directory /var/task/packages/sklearn --pattern tests
 CMD [ "lambda_entry.handler" ]

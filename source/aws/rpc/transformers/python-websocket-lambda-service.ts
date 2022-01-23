@@ -355,7 +355,7 @@ module CodeGeneration {
             let fullname = this.instance.Fullname.join('.');
             builder.appendLine(`def __init__(self):`, indent);
             builder.appendLine(`super().__init__()`, indent + 1);
-            builder.appendLine(`self.__reflection = '${fullname}'`, indent + 1);
+            builder.appendLine(`self['__reflection'] = '${fullname}'`, indent + 1);
             builder.appendLine('', 0);
         }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
@@ -375,22 +375,24 @@ module CodeGeneration {
             return pairs.join(', ');
         }
         emitServiceInvokeMethod(builder: CodeBuilder, indent: number) {
-            builder.appendLine(`async def __invoke(self, message: ${this.emitType(baseMessageType, builder)}) -> ${this.emitType(baseMessageType, builder)}:`, indent);
+            builder.appendLine(`async def WEBSOCKETSERVICEBASE__invoke(self, message: ${this.emitType(baseMessageType, builder)}) -> ${this.emitType(baseMessageType, builder)}:`, indent);
             let conditionIndent = indent + 1;
             let contentIndent = conditionIndent + 1;
             let switchIndex = 0;
+            builder.appendLine(`service = message['Service']`, conditionIndent);
+            builder.appendLine(`method = message['Method']`, conditionIndent);
             for (let method of this.instance.Methods) {
                 if (switchIndex == 0) {
-                    builder.appendLine(`if message.Method == '${method.Name}':`, conditionIndent);
+                    builder.appendLine(`if method == '${method.Name}':`, conditionIndent);
                 } else {
-                    builder.appendLine(`elif message.Method == '${method.Name}':`, conditionIndent);
+                    builder.appendLine(`elif method == '${method.Name}':`, conditionIndent);
                 }
                 for (let parameter of method.Parameters) {
                     if (parameter.Type.Reference.IsGenericPlaceholder && !parameter.Type.Reference.IsClassGenericPlaceholder) {
-                        builder.appendLine(`____${parameter.Name}: any = message.Payload['${parameter.Name}']`, contentIndent)
+                        builder.appendLine(`____${parameter.Name}: any = message['Payload']['${parameter.Name}']`, contentIndent)
                     } else {
                         let parameterType = this.emitType(parameter.Type, builder);
-                        builder.appendLine(`____${parameter.Name}: ${parameterType} = message.Payload['${parameter.Name}']`, contentIndent)
+                        builder.appendLine(`____${parameter.Name}: ${parameterType} = message['Payload']['${parameter.Name}']`, contentIndent)
                     }
                 }
                 let parameterNames = method.Parameters
@@ -404,7 +406,7 @@ module CodeGeneration {
                 ++switchIndex;
             }
             builder.appendLine(`else:`, conditionIndent);
-            builder.appendLine(`raise Exception(f'\{message.Service\}.\{message.Method\} is not defined.')`, contentIndent);
+            builder.appendLine(`raise Exception(f'\{service\}.\{method\} is not defined.')`, contentIndent);
         }
     }
 
@@ -462,7 +464,7 @@ module CodeGeneration {
             let fullname = this.instance.Fullname.join('.');
             builder.appendLine(`def __init__(self):`, indent);
             builder.appendLine(`super().__init__()`, indent + 1);
-            builder.appendLine(`self.__reflection = '${fullname}'`, indent + 1);
+            builder.appendLine(`self['__reflection'] = '${fullname}'`, indent + 1);
             builder.appendLine('', 0);
         }
         emitProperty(builder: CodeBuilder, indent: number, property: Property) {

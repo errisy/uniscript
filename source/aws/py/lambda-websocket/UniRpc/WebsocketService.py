@@ -21,29 +21,29 @@ class WebsocketService:
     user: IWebSocketUser
 
     def RegisterService(self, service: WebsocketServiceBase) -> WebsocketService:
-        self.services.set(service['__reflection'], service)
+        self.services[service['__reflection']] = service
         return self
 
     async def ProcessEvent(self, event: IWebsocketEvent):
         try:
-            self.user = await self.GetUser(event.requestContext)
+            self.user = await self.GetUser(event['requestContext'])
         except Exception as exception:
             print(exception)
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'
             }
-        message: BaseMessage = json.loads(event.body)
-        groups: List[str] = json.loads(self.user.Groups.S)
-        if not GroupClausesAuthorize(groups, message.Service, message.Method):
+        message: BaseMessage = json.loads(event['body'])
+        groups: List[str] = json.loads(self.user['Groups']['S'])
+        if not GroupClausesAuthorize(groups, message['Service'], message['Method']):
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'
             }
-        if message.Service in self.services.keys():
-            service = self.services.get(message.Service)
-            result = await service.__invoke(message)
-            self.Respond(event.requestContext, result)
+        if message['Service'] in self.services.keys():
+            service = self.services[message['Service']]
+            result = await service.WEBSOCKETSERVICEBASE__invoke(message)
+            self.Respond(event['requestContext'], result)
             return {
                 'statusCode': 202,
                 'body': 'Accepted'
@@ -55,26 +55,26 @@ class WebsocketService:
 
     async def GetUser(self, context: IRequestContext):
         connectionId = context['connectionId']
-        connectionResponse: Dict[str, Any] = dynamo.get_item({
-            'TableName': WebSocketConnectionsTable,
-            'Key': {
+        connectionResponse: Dict[str, Any] = dynamo.get_item(
+            TableName=WebSocketConnectionsTable,
+            Key={
                 'ConnectionId': {
                     'S': connectionId
                 }
             }
-        })
+        )
         if 'Item' not in connectionResponse.keys():
             raise Exception(f'No Connection was found for Connection Id {connectionId}')
         connection: IWebSocketConnection = connectionResponse['Item']
         username = connection['Username']['S']
-        userResponse = dynamo.getItem({
-            'TableName': WebSocketUsersTable,
-            'Key': {
+        userResponse = dynamo.get_item(
+            TableName=WebSocketUsersTable,
+            Key={
                 'Username': {
                     'S': username
                 }
             }
-        })
+        )
         if 'Item' not in userResponse.keys():
             raise Exception(f'No user was found for User Id {username} via Connection Id ${connectionId}')
         return userResponse['Item']
@@ -87,15 +87,15 @@ class WebsocketService:
             'Success': False,
             'ErrorMessage': 'Unauthorzied'
         }
-        self.Respond(event.requestContext, response)
+        self.Respond(event['requestContext'], response)
 
     def Respond(self, context: IRequestContext, data: any):
         agm = boto3.client(
-            'apigatewaymanagementapi', endpoint_url=context['domainName'] + '/' + context['stage']
+            'apigatewaymanagementapi', endpoint_url='https://' + context['domainName'] + '/' + context['stage']
         )
         connectionId: str = context['connectionId']
         stringData: str = json.dumps(data)
-        agm.postToConnection({
-            'ConnectionId': connectionId,
-            'Data': stringData
-        })
+        agm.post_to_connection(
+            ConnectionId=connectionId,
+            Data=stringData
+        )

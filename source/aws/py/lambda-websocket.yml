@@ -27,6 +27,7 @@ script:
       - UniRpc/ReturnMessage.py
       - UniRpc/WebsocketService.py
       - UniRpc/WebsocketServiceBase.py
+      - '?ServiceRelays.py'
       format:
       - lambda_entry.py
       - lambda_entry_test.py

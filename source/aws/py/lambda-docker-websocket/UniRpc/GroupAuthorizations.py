@@ -21,9 +21,10 @@ def GroupAuthorizations(policy: str, group: str, service: str, method: str) -> b
     if group not in groupPolicySet.keys():
         return False
     groupPolicy: IGroupPolicy = groupPolicySet[group]
-    if service not in groupPolicy.keys():
+    services = groupPolicy['Services']
+    if service not in services.keys():
         return False
-    servicePolicy: Union[str, List[str]] = groupPolicy[service]
+    servicePolicy: Union[str, List[str]] = services[service]
     if isinstance(servicePolicy, str) and servicePolicy == '*':
         return True
     if isinstance(servicePolicy, list) and servicePolicy.includes(method):

@@ -33,6 +33,7 @@ script:
       - UniRpc/ReturnMessage.cs
       - UniRpc/WebsocketService.cs
       - UniRpc/WebsocketServiceBase.cs
+      - '?ServiceRelays.cs'
       format:
       - Function.cs
       - FunctionTest.cs

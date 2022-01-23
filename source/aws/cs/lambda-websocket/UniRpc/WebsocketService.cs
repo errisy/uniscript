@@ -4,20 +4,51 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2;
 using Amazon.ApiGatewayManagementApi;
 using Amazon.ApiGatewayManagementApi.Model;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Lambda.APIGatewayEvents;
+using Amazon.Lambda;
+using Amazon.Lambda.Model;
 
 namespace UniRpc
 {
     public static partial class Static
     {
-        public static string WebSocketConnectionsTable = Environment.GetEnvironmentVariable("WebSocketConnectionsTable");
-        public static string WebSocketUsersTable = Environment.GetEnvironmentVariable("WebSocketUsersTable");
+        public static string UniRpcApplication = System.Environment.GetEnvironmentVariable("UniRpcApplication");
+        public static string UniRpcEnvironmentTarget = System.Environment.GetEnvironmentVariable("UniRpcEnvironmentTarget");
+        public static string WebSocketConnectionsTable = System.Environment.GetEnvironmentVariable("WebSocketConnectionsTable");
+        public static string WebSocketUsersTable = System.Environment.GetEnvironmentVariable("WebSocketUsersTable");
         public static AmazonDynamoDBClient dynamo = new AmazonDynamoDBClient();
+        public static AmazonLambdaClient lambda = new AmazonLambdaClient();
+        public static string FindRoute(string service)
+        {
+            List<string> sections = service.Split('.').ToList();
+            object node = __ServiceRelayRoutes;
+            while (node.GetType() != typeof(string))
+            {
+                if (node == null)
+                {
+                    throw new Exception($"No Target Defined for Service \"{service}\"");
+                }
+                var current = sections.First();
+                sections.RemoveAt(0);
+                PropertyInfo propertyInfo = node.GetType().GetProperty(current);
+                if (propertyInfo != null)
+                {
+                    throw new Exception($"No Target Defined for Service \"{service}\"");
+                }
+                else
+                {
+                    node = propertyInfo.GetValue(node);
+                }
+            }
+            return node.ToString();
+        }
     }
 
     public class WebsocketService
@@ -132,6 +163,28 @@ namespace UniRpc
                 ConnectionId = context.ConnectionId,
                 Data = new MemoryStream(Encoding.UTF8.GetBytes(stringData))
             });
+        }
+
+        public async Task<BaseMessage> InvokeService(BaseMessage message, string invokeType)
+        {
+            string targetName = Static.FindRoute(message.Service);
+            var response = await Static.lambda.InvokeAsync(new InvokeRequest()
+            {
+                FunctionName = $"{Static.UniRpcApplication}--{targetName}--{Static.UniRpcEnvironmentTarget}",
+                InvocationType = invokeType,
+                Payload = JsonSerializer.Serialize(message)
+            });
+            if (invokeType == "Event")
+            {
+                return null;
+            }
+            else
+            {
+                using (StreamReader reader = new StreamReader(response.Payload))
+                {
+                    return JsonSerializer.Deserialize<BaseMessage>(reader.ReadToEnd());
+                }
+            }
         }
     }
 }

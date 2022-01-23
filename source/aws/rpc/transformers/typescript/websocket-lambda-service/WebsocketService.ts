@@ -3,15 +3,36 @@ import { IRequestContext, IWebSocketConnection, IWebsocketEvent, IWebSocketUser 
 import { BaseMessage } from "./BaseMessage";
 import { GroupClausesAuthorize } from './GroupAuthorizations'
 import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk';
+import { __ServiceRelayRoutes } from '../ServiceRelays';
 
+const UniRpcApplication = process.env['UniRpcApplication'];
+const UniRpcEnvironmentTarget = process.env['UniRpcEnvironmentTarget'];
 const WebSocketConnectionsTable = process.env['WebSocketConnectionsTable'];
 const WebSocketUsersTable = process.env['WebSocketUsersTable'];
 const dynamo = new DynamoDB();
+
+function findRoute(service: string): string {
+  let sections = service.split('.');
+  let node = __ServiceRelayRoutes;
+  while (typeof node != 'string') {
+    if (typeof node == 'undefined') {
+      throw `No Target Defined for Service "${service}"`;
+    }
+    let current = sections.shift();
+    if (current in node) {
+      node = node[current];
+    } else {
+      throw `No Target Defined for Service "${service}"`;
+    }
+  }
+  return node;
+}
 
 export class WebsocketService {
   tracking: {[serial: string]: any} = {};
   services: Map<string, WebsocketServiceBase> = new Map<string, WebsocketServiceBase>();
   user: IWebSocketUser;
+  context: IRequestContext;
 
   RegisterService<T extends WebsocketServiceBase>(service: T): this {
     this.services.set(service.__reflection, service);
@@ -19,6 +40,7 @@ export class WebsocketService {
   }
 
   async ProcessEvent(event: IWebsocketEvent) {
+    this.context = event.requestContext;
     try {
       this.user = await this.GetUser(event.requestContext);
     } catch (ex) {
@@ -89,5 +111,22 @@ export class WebsocketService {
         ConnectionId: context.connectionId,
         Data: stringData
     }).promise());
+  }
+  
+  async InvokeService(message: BaseMessage, invokeType: 'Event' | 'RequestResponse'): Promise<any> {
+    let targetName: string = findRoute(message.Service);
+    let response = await (lambda.invoke({
+      FunctionName: targetName,
+      InvocationType: invokeType,
+      Payload: {
+        requestContext: this.context,
+        body: JSON.stringify(message)
+      }
+    }).promise());
+    if (invokeType == 'Event') {
+      return undefined;
+    } else {
+      return JSON.parse(response.Payload.toString());
+    }
   }
 }

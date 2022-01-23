@@ -54,9 +54,11 @@ Resources:
       #         InputString: !Sub 'ProjectLayer@${Application}--[project-name]--${AWSRegion}--${EnvironmentTarget}'
       #         Operation: Stack
     # Add Environment Variables here
-    #   Environment:
-    #     Variables:
-    #       VariableName: !Sub '${variable}-value'
+      Environment:
+        Variables:
+          UniRpcApplication: !Sub ${Application}
+          UniRpcProject: !Sub ${Project}
+          UniRpcEnvironmentTarget: !Sub ${EnvironmentTarget}
 
   # if you want to schedule the lambda by timer
   # LambdaRunnerRule:

@@ -58,6 +58,9 @@ Resources:
     # Add Environment Variables here
       Environment:
         Variables:
+          UniRpcApplication: !Sub ${Application}
+          UniRpcProject: !Sub ${Project}
+          UniRpcEnvironmentTarget: !Sub ${EnvironmentTarget}
           WebSocketConnectionsTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-connections
           WebSocketUsersTable: !Sub ${Application}--${WebSocketProject}--${EnvironmentTarget}--websocket-users
 

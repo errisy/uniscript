@@ -8,5 +8,5 @@ def ReturnMessage(message: BaseMessage, value: object) -> BaseMessage:
         'Method': message['Method'],
         'GenericArguments': message['GenericArguments'],
         'Payload': value,
-        'Success': message['Success']
+        'Success': True
     }

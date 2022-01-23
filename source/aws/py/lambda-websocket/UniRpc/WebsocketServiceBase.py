@@ -35,9 +35,9 @@ class WebsocketServiceBase:
             self.__group = value
 
     @abstractmethod
-    def __outgoing(self, message: BaseMessage) -> None:
+    async def WEBSOCKETSERVICEBASE__outgoing(self, message: BaseMessage) -> None:
         pass
 
     @abstractmethod
-    def __invoke(self, message: BaseMessage) -> Coroutine[BaseMessage]:
+    async def WEBSOCKETSERVICEBASE__invoke(self, message: BaseMessage) -> BaseMessage:
         pass

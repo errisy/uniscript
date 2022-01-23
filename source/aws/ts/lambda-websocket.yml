@@ -28,6 +28,7 @@ script:
       - UniRpc/ReturnMessage.ts
       - UniRpc/WebsocketService.ts
       - UniRpc/WebsocketServiceBase.ts
+      - '?ServiceRelays.ts'
       format:
       - lambda_entry.ts
       - lambda_entry.test.ts

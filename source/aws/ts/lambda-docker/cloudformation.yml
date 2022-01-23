@@ -61,9 +61,11 @@ Resources:
       MemorySize: 1024
       Role: !GetAtt LambdaRole.Arn
       Timeout: 60
-      # Environment:
-      #   Variables:
-      #     Key: Value
+      Environment:
+        Variables:
+          UniRpcApplication: !Sub ${Application}
+          UniRpcProject: !Sub ${Project}
+          UniRpcEnvironmentTarget: !Sub ${EnvironmentTarget}
 
   ApiGatewayInvokePermission:
     Type: AWS::Lambda::Permission

@@ -8,7 +8,7 @@ namespace UniRpc
 
         public static IPolicySets __PolicySets = new IPolicySets() {
             { "ServiceUserGroups", ServiceUserGroups },
-            {"TesterUserGroups", TesterUserGroups }
+            { "TesterUserGroups", TesterUserGroups }
         };
     }
 }

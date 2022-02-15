@@ -271,6 +271,7 @@ module CodeGeneration {
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
             this.emitService(builder, indent);
+            this.emitLambdaClient(builder, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -286,7 +287,7 @@ module CodeGeneration {
                     interfaces.push(this.emitType(implementation, builder));
                 }
             }
-            let result: string = ''
+            let result: string = '';
             if (baseTypes.length > 0) {
                 result += ` extends ${baseTypes.join(', ')}`;
             }
@@ -330,14 +331,6 @@ module CodeGeneration {
             builder.appendLine(`public constructor () {`, indent);
             builder.appendLine(`super();`, indent + 1);
             builder.appendLine(`this.__reflection = '${fullname}';`, indent + 1);
-            // if (this.instance.IsGeneric) {
-            //     let genericTypeNames = this.instance.GenericArguments
-            //         .map(arg => `typeof(${arg.Name}).FullName`)
-            //         .join(', ');
-            //     builder.appendLine(`this.__genericArguments = [${genericTypeNames}];`, indent + 1);
-            // } else {
-            //     builder.appendLine(`this.__genericArguments = [];`, indent + 1);
-            // }
             builder.appendLine(`}`, indent);
         }
         emitServiceMethod(builder: CodeBuilder, indent: number, method: Method) {
@@ -392,6 +385,45 @@ module CodeGeneration {
             }
             builder.appendLine(`}`, switchIndent);
             builder.appendLine(`throw \`$\{message.Service\}.$\{message.Method\} is not defined.\`;`, switchIndent);
+            builder.appendLine(`}`, indent);
+        }
+        emitLambdaClient(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`export class ${this.instance.Name}__LambdaClient {`, indent);
+            this.emitLambdaClientContructor(builder, indent + 1);
+            for (let method of this.instance.Methods) {
+                this.emitLambdaClientMethod(builder, indent + 1, method);
+            }
+            builder.appendLine(`}`, indent);
+        }
+        emitLambdaClientMethod(builder: CodeBuilder, indent: number, method: Method) {
+            emitComments(builder, indent, method.Comments);
+            if (method.IsGeneric) {
+                let genericArugments = method.GenericArguments
+                    .map(arg => this.emitType(arg, builder))
+                    .join(', ');
+                    builder.appendLine(`public async ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder)}): Promise<${this.emitType(method.ReturnType, builder)}> {`, indent);
+            } else {
+                builder.appendLine(`public async ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)}): Promise<${this.emitType(method.ReturnType, builder)}> {`, indent);
+            }
+            builder.appendMultipleLines(
+`return await this.__websocketService.InvokeService({
+    Service: '${this.instance.Fullname.join('.')}',
+    Method: '${method.Name}',
+    GenericArguments: [],
+    Payload: {`, indent + 1);
+            for (let i = 0; i < method.Parameters.length; ++i) {
+                let parameter = method.Parameters[i];
+                builder.appendLine(`${parameter.Name}: ${parameter.Name}${(i < method.Parameters.length - 1) ? ',' : ''}`, indent + 3);
+            }
+            builder.appendMultipleLines(
+`    }
+}, this.__invokeType);`, indent + 1);
+            builder.appendLine(`}`, indent);
+        }
+        emitLambdaClientContructor(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`public constructor (`, indent);
+            builder.appendLine(`protected __websocketService: ${this.emitType(websocketServiceType, builder)},`, indent + 1);
+            builder.appendLine(`protected __invokeType: "Event" | "RequestResponse") {`, indent + 1);
             builder.appendLine(`}`, indent);
         }
     }

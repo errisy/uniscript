@@ -2,7 +2,7 @@ import { WebsocketServiceBase } from "./WebsocketServiceBase";
 import { IRequestContext, IWebSocketConnection, IWebsocketEvent, IWebSocketUser } from "./LambdaWebsocketTypes";
 import { BaseMessage } from "./BaseMessage";
 import { GroupClausesAuthorize } from './GroupAuthorizations'
-import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk';
+import { ApiGatewayManagementApi, DynamoDB, Lambda } from 'aws-sdk';
 import { __ServiceRelayRoutes } from '../ServiceRelays';
 
 const UniRpcApplication = process.env['UniRpcApplication'];
@@ -10,19 +10,20 @@ const UniRpcEnvironmentTarget = process.env['UniRpcEnvironmentTarget'];
 const WebSocketConnectionsTable = process.env['WebSocketConnectionsTable'];
 const WebSocketUsersTable = process.env['WebSocketUsersTable'];
 const dynamo = new DynamoDB();
+const lambda = new Lambda();
 
 function findRoute(service: string): string {
   let sections = service.split('.');
   let node = __ServiceRelayRoutes;
   while (typeof node != 'string') {
     if (typeof node == 'undefined') {
-      throw `No Target Defined for Service "${service}"`;
+      throw new Error(`No Target Defined for Service "${service}"`);
     }
     let current = sections.shift();
     if (current in node) {
       node = node[current];
     } else {
-      throw `No Target Defined for Service "${service}"`;
+      throw new Error(`No Target Defined for Service "${service}"`);
     }
   }
   return node;
@@ -35,6 +36,7 @@ export class WebsocketService {
   context: IRequestContext;
 
   RegisterService<T extends WebsocketServiceBase>(service: T): this {
+    service.__websocketService = this;
     this.services.set(service.__reflection, service);
     return this;
   }
@@ -59,13 +61,35 @@ export class WebsocketService {
       };
     }
     if (this.services.has(message.Service)) {
-      let service = this.services.get(message.Service);
-      let result = await service.__invoke(message);
-      await this.Respond(event.requestContext, result);
-      return {
-        statusCode: 202,
-        body: 'Accepted'
-      };
+      try {
+        let service = this.services.get(message.Service);
+        let result = await service.__invoke(message);
+        await this.Respond(event.requestContext, result);
+        return {
+          statusCode: 202,
+          body: 'Accepted'
+        };
+      } catch (ex) {
+        if (ex instanceof LogicTerminationError) {
+          return {
+            statusCode: 202,
+            body: 'Accepted'
+          };
+        } else if (ex instanceof Error) {
+          console.error(ex.name, '=>', ex.message);
+          console.error(ex.stack);
+          return {
+            statusCode: 500,
+            body: 'Internal Server Error'
+          }
+        } else {
+          console.error('Not Error Type:', ex);
+          return {
+            statusCode: 500,
+            body: 'Internal Server Error'
+          }
+        }
+      }
     }
     return {
       statusCode: 403,
@@ -80,7 +104,7 @@ export class WebsocketService {
             ConnectionId: { S: context.connectionId }
         }
     }).promise());
-    if(!connectionResponse.Item) throw `No Connection was found for Connection Id ${context.connectionId}`;
+    if(!connectionResponse.Item) throw new Error(`No Connection was found for Connection Id ${context.connectionId}`);
     let connection: IWebSocketConnection = connectionResponse.Item as any;
     let userResponse = await (dynamo.getItem({
         TableName: WebSocketUsersTable,
@@ -88,7 +112,7 @@ export class WebsocketService {
             Username: { S: connection.Username.S }
         }
     }).promise());
-    if(!userResponse.Item) throw `No user was found for User Id ${connection.Username.S} via Connection Id ${context.connectionId}`;
+    if(!userResponse.Item) throw new Error(`No user was found for User Id ${connection.Username.S} via Connection Id ${context.connectionId}`);
     return userResponse.Item as any;
   }
 
@@ -114,9 +138,9 @@ export class WebsocketService {
   }
   
   async InvokeService(message: BaseMessage, invokeType: 'Event' | 'RequestResponse'): Promise<any> {
-    let targetName: string = findRoute(message.Service);
+    let functionName: string = findRoute(message.Service);
     let response = await (lambda.invoke({
-      FunctionName: targetName,
+      FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
       Payload: {
         requestContext: this.context,
@@ -130,3 +154,5 @@ export class WebsocketService {
     }
   }
 }
+
+export class LogicTerminationError extends Error { }

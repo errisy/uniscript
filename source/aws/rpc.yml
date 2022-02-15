@@ -74,7 +74,7 @@ script:
       - transformers/uni-rpc.yaml
       - transformers/users-cognito.ts
       - tsconfig.json
-      - uni-rpc.yaml
+      - '?uni-rpc.yaml'
   - name: npm install
     cmd: cd @{project} && npm i
     bash: cd @{project} ; npm i

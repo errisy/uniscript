@@ -1,9 +1,11 @@
 from typing import List, Coroutine, Any
 from abc import abstractmethod
 from UniRpc.BaseMessage import BaseMessage
+from UniRpc.WebsocketService import WebsocketService
 
 
 class WebsocketServiceBase:
+    WEBSOCKETSERVICEBASE__websocketService: WebsocketService
     __reflection: str
     __isGeneric: bool
     __genericArguments: List[str]
@@ -21,6 +23,8 @@ class WebsocketServiceBase:
             return self.__user
         elif key == '__group':
             return self.__group
+        elif key == 'WEBSOCKETSERVICEBASE__websocketService':
+            return self.WEBSOCKETSERVICEBASE__websocketService
 
     def __setitem__(self, key: str, value: Any):
         if key == '__reflection':
@@ -33,6 +37,8 @@ class WebsocketServiceBase:
             self.__user = value
         elif key == '__group':
             self.__group = value
+        elif key == 'WEBSOCKETSERVICEBASE__websocketService':
+            self.WEBSOCKETSERVICEBASE__websocketService = value
 
     @abstractmethod
     async def WEBSOCKETSERVICEBASE__outgoing(self, message: BaseMessage) -> None:

@@ -4,6 +4,6 @@ export interface BaseMessage {
     Method: string;
     GenericArguments: string[];
     Payload: any;
-    Success: boolean;
+    Success?: boolean;
     ErrorMessage?: string;
 }

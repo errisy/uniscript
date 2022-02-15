@@ -4,6 +4,7 @@ namespace UniRpc
 {
     public abstract class WebsocketServiceBase
     {
+        public WebsocketService __websocketService { get; set; }
         public string __reflection { get; set; }
         public bool __isGeneric { get; set; }
         public string[] __genericArguments { get; set; }

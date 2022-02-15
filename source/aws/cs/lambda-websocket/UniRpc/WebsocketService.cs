@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Text;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2;
 using Amazon.ApiGatewayManagementApi;
@@ -27,7 +26,7 @@ namespace UniRpc
         public static AmazonLambdaClient lambda = new AmazonLambdaClient();
         public static string FindRoute(string service)
         {
-            List<string> sections = service.Split('.').ToList();
+            var sections = new LinkedList<string>(service.Split("."));
             object node = __ServiceRelayRoutes;
             while (node.GetType() != typeof(string))
             {
@@ -35,19 +34,27 @@ namespace UniRpc
                 {
                     throw new Exception($"No Target Defined for Service \"{service}\"");
                 }
-                var current = sections.First();
-                sections.RemoveAt(0);
-                PropertyInfo propertyInfo = node.GetType().GetProperty(current);
-                if (propertyInfo != null)
+                if (sections.Any())
                 {
-                    throw new Exception($"No Target Defined for Service \"{service}\"");
+                    string current = sections.First.Value;
+                    sections.RemoveFirst();
+                    var type = node.GetType();
+                    var property = type.GetProperty(current);
+                    if (property == null)
+                    {
+                        throw new Exception($"No Target Defined for Service \"{service}\"");
+                    }
+                    else
+                    {
+                        node = property.GetValue(node);
+                    }
                 }
                 else
                 {
-                    node = propertyInfo.GetValue(node);
+                    throw new Exception($"No Target Defined for Service \"{service}\"");
                 }
             }
-            return node.ToString();
+            return node as string;
         }
     }
 
@@ -57,6 +64,7 @@ namespace UniRpc
 
         public Dictionary<string, WebsocketServiceBase> services = new Dictionary<string, WebsocketServiceBase>();
         public Dictionary<string, AttributeValue> user { get; set; }
+        public APIGatewayProxyRequest.ProxyRequestContext context { get; set; }
         public WebsocketService RegisterService<T>(T service) where T : WebsocketServiceBase
         {
             if (services.ContainsKey(service.__reflection))
@@ -72,6 +80,7 @@ namespace UniRpc
 
         public async Task<APIGatewayProxyResponse> ProcessEvent(APIGatewayProxyRequest _event)
         {
+            context = _event.RequestContext;
             try
             {
                 user = await GetUser(_event.RequestContext);
@@ -85,7 +94,7 @@ namespace UniRpc
                     Body = "Unauthorized."
                 };
             }
-            BaseMessage message  = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
+            BaseMessage message = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
             string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
             if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
@@ -98,13 +107,34 @@ namespace UniRpc
             if (services.ContainsKey(message.Service))
             {
                 var service = services[message.Service];
-                var result = await service.__invoke(message);
-                await Respond(_event.RequestContext, result);
-                return new APIGatewayProxyResponse
+                try
                 {
-                    StatusCode = 202,
-                    Body = "Accepted"
-                };
+                    var result = await service.__invoke(message);
+                    await Respond(_event.RequestContext, result);
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = 202,
+                        Body = "Accepted"
+                    };
+                }
+                catch (LogicTerminatedExecption noResponse)
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = 202,
+                        Body = "Accepted"
+                    };
+                }
+                catch (Exception exception)
+                {
+                    Console.Error.WriteLine(exception.Message);
+                    Console.Error.WriteLine(exception.StackTrace);
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = 500,
+                        Body = "Internal Server Error"
+                    };
+                }
             }
             return new APIGatewayProxyResponse
             {
@@ -113,9 +143,11 @@ namespace UniRpc
             };
         }
 
-        public async Task<Dictionary<string, AttributeValue>> GetUser(APIGatewayProxyRequest.ProxyRequestContext context) {
+        public async Task<Dictionary<string, AttributeValue>> GetUser(APIGatewayProxyRequest.ProxyRequestContext context)
+        {
             var connectionResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest {
+                new GetItemRequest
+                {
                     TableName = Static.WebSocketConnectionsTable,
                     Key = new Dictionary<string, AttributeValue> {
                     { "ConnectionId", new AttributeValue { S = context.ConnectionId } }
@@ -127,7 +159,8 @@ namespace UniRpc
             }
             Dictionary<string, AttributeValue> connection = connectionResponse.Item;
             var userResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest {
+                new GetItemRequest
+                {
                     TableName = Static.WebSocketUsersTable,
                     Key = new Dictionary<string, AttributeValue> {
                         {  "Username", new AttributeValue{ S = connection[IWebSocketUser.Username].S } }
@@ -140,7 +173,8 @@ namespace UniRpc
             return userResponse.Item;
         }
 
-        public async Task RespondUnauthorized(APIGatewayProxyRequest _event, BaseMessage message) {
+        public async Task RespondUnauthorized(APIGatewayProxyRequest _event, BaseMessage message)
+        {
             BaseMessage response = new BaseMessage();
             response.Id = message.Id;
             response.Service = message.Service;
@@ -150,7 +184,8 @@ namespace UniRpc
             await Respond(_event.RequestContext, response);
         }
 
-        public async Task Respond(APIGatewayProxyRequest.ProxyRequestContext context, object data) {
+        public async Task Respond(APIGatewayProxyRequest.ProxyRequestContext context, object data)
+        {
             var agm = new AmazonApiGatewayManagementApiClient(
                 new AmazonApiGatewayManagementApiConfig()
                 {
@@ -165,26 +200,29 @@ namespace UniRpc
             });
         }
 
-        public async Task<BaseMessage> InvokeService(BaseMessage message, string invokeType)
+        public async Task<TReturn> InvokeService<TReturn>(BaseMessage message, string invokeType)
         {
-            string targetName = Static.FindRoute(message.Service);
-            var response = await Static.lambda.InvokeAsync(new InvokeRequest()
+            var functionName = Static.FindRoute(message.Service);
+            var response = await Static.lambda.InvokeAsync(new InvokeRequest
             {
-                FunctionName = $"{Static.UniRpcApplication}--{targetName}--{Static.UniRpcEnvironmentTarget}",
+                FunctionName = $"{Static.UniRpcApplication}--{functionName}--{Static.UniRpcEnvironmentTarget}",
                 InvocationType = invokeType,
-                Payload = JsonSerializer.Serialize(message)
+                Payload = JsonSerializer.Serialize(new APIGatewayProxyRequest
+                {
+                    RequestContext = context,
+                    Body = JsonSerializer.Serialize(message)
+                })
             });
             if (invokeType == "Event")
             {
-                return null;
+                return default(TReturn);
             }
             else
             {
-                using (StreamReader reader = new StreamReader(response.Payload))
-                {
-                    return JsonSerializer.Deserialize<BaseMessage>(reader.ReadToEnd());
-                }
+                return JsonSerializer.Deserialize<TReturn>(response.Payload.ToString());
             }
         }
     }
+
+    public class LogicTerminatedExecption : Exception {  }
 }

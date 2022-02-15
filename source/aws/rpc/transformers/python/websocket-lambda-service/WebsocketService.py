@@ -3,6 +3,7 @@ from typing import Dict, Any, List
 import json
 import boto3
 import os
+import traceback
 
 from UniRpc.WebsocketServiceBase import WebsocketServiceBase
 from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
@@ -41,6 +42,7 @@ class WebsocketService:
     context: IRequestContext
 
     def RegisterService(self, service: WebsocketServiceBase) -> WebsocketService:
+        service.WEBSOCKETSERVICEBASE__websocketService = self
         self.services[service['__reflection']] = service
         return self
 
@@ -63,12 +65,25 @@ class WebsocketService:
             }
         if message['Service'] in self.services.keys():
             service = self.services[message['Service']]
-            result = await service.WEBSOCKETSERVICEBASE__invoke(message)
-            self.Respond(event['requestContext'], result)
-            return {
-                'statusCode': 202,
-                'body': 'Accepted'
-            }
+            try:
+                result = await service.WEBSOCKETSERVICEBASE__invoke(message)
+                self.Respond(event['requestContext'], result)
+                return {
+                    'statusCode': 202,
+                    'body': 'Accepted'
+                }
+            except LogicTerminationException as ex:
+                return {
+                    'statusCode': 202,
+                    'body': 'Accepted'
+                }
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                return {
+                    'statusCode': 500,
+                    'body': 'Internal Server Error'
+                }
         return {
             'statusCode': 403,
             'body': 'Forbidden'
@@ -135,3 +150,8 @@ class WebsocketService:
             return None
         else:
             return json.loads(response['Payload'].decode('utf-8'))
+
+
+class LogicTerminationException(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)

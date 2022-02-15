@@ -283,7 +283,10 @@ module CodeGeneration {
             let filename = path.join(rootDirectory, ...this.instance.Namespace, this.instance.Name + '.py');
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
+            builder.appendLine(``, indent);
             this.emitService(builder, indent);
+            builder.appendLine(``, indent);
+            this.emitLambdaClient(builder, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -407,6 +410,48 @@ module CodeGeneration {
             }
             builder.appendLine(`else:`, conditionIndent);
             builder.appendLine(`raise Exception(f'\{service\}.\{method\} is not defined.')`, contentIndent);
+            builder.appendLine('', 0);
+        }
+        emitLambdaClient(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`class ${this.instance.Name}__LambdaClient:`, indent);
+            builder.appendLine(`WEBSOCKETSERVICEBASE__websocketService: ${this.emitType(websocketServiceType, builder)}`, indent + 1);
+            builder.appendLine(`WEBSOCKETSERVICEBASE__invokeType: str`, indent + 1);
+            builder.appendLine(``, indent + 1);
+            this.emitLambdaClientContructor(builder, indent + 1);
+            for (let method of this.instance.Methods) {
+                this.emitLambdaClientMethod(builder, indent + 1, method);
+            }
+        }
+        emitLambdaClientMethod(builder: CodeBuilder, indent: number, method: Method) {
+            emitComments(builder, indent, method.Comments);
+            if (method.IsGeneric) {
+                let genericArugments = method.GenericArguments
+                    .map(arg => this.emitType(arg, builder))
+                    .join(', ');
+                    builder.appendLine(`async def ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder, method)}) -> ${this.emitType(method.ReturnType, builder)}:`, indent);
+            } else {
+                builder.appendLine(`async def ${method.Name}(${this.emitMethodParameters(method.Parameters, builder, method)}) -> ${this.emitType(method.ReturnType, builder)}:`, indent);
+            }
+            builder.appendMultipleLines(
+`return await self.WEBSOCKETSERVICEBASE__websocketService.InvokeService({
+    'Service': '${this.instance.Fullname.join('.')}',
+    'Method': '${method.Name}',
+    'GenericArguments': [],
+    'Payload': {`, indent + 1);
+            for (let i = 0; i < method.Parameters.length; ++i) {
+                let parameter = method.Parameters[i];
+                builder.appendLine(`'${parameter.Name}': ${parameter.Name}${(i < method.Parameters.length - 1) ? ',' : ''}`, indent + 3);
+            }
+            builder.appendMultipleLines(
+`    }
+}, self.WEBSOCKETSERVICEBASE__invokeType)`, indent + 1);
+            builder.appendLine(``, indent + 1);
+        }
+        emitLambdaClientContructor(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`def __init__(self, __websocketService: ${this.emitType(websocketServiceType, builder)}, __invokeType: str):`, indent);
+            builder.appendLine(`self.WEBSOCKETSERVICEBASE__websocketService = __websocketService`, indent + 1);
+            builder.appendLine(`self.WEBSOCKETSERVICEBASE__invokeType = __invokeType`, indent + 1);
+            builder.appendLine(``, indent + 1);
         }
     }
 

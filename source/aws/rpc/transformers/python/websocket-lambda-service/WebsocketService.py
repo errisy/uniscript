@@ -9,6 +9,7 @@ from UniRpc.WebsocketServiceBase import WebsocketServiceBase
 from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
 from UniRpc.BaseMessage import BaseMessage
 from UniRpc.GroupAuthorizations import GroupClausesAuthorize
+from ServiceRelays import __ServiceRelayRoutes
 
 
 UniRpcApplication = os.getenv('UniRpcApplication')
@@ -142,7 +143,7 @@ class WebsocketService:
             FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
             InvocationType=invoke_type,
             Payload={
-                'requestContext': self.context
+                'requestContext': self.context,
                 'body': json.dumps(message)
             }
         )
@@ -150,6 +151,17 @@ class WebsocketService:
             return None
         else:
             return json.loads(response['Payload'].decode('utf-8'))
+
+    async def InvokeServiceVoid(self, message: BaseMessage, invoke_type: str) -> None:
+        function_name: str = find_route(message['Service'])
+        response = _lambda.invoke(
+            FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
+            InvocationType=invoke_type,
+            Payload={
+                'requestContext': self.context,
+                'body': json.dumps(message)
+            }
+        )
 
 
 class LogicTerminationException(Exception):

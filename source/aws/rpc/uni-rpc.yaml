@@ -13,3 +13,5 @@ rpc:
   type: websocket-lambda-service
 - users: '../users'
   type: cognito
+- py: '../py-lbdc-ivk-1/'
+  type: websocket-lambda-service

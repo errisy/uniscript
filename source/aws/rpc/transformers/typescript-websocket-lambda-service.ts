@@ -388,7 +388,14 @@ module CodeGeneration {
             builder.appendLine(`}`, indent);
         }
         emitLambdaClient(builder: CodeBuilder, indent: number) {
-            builder.appendLine(`export class ${this.instance.Name}__LambdaClient {`, indent);
+            if (this.instance.IsGeneric) {
+                let genericArugments = this.instance.GenericArguments
+                    .map(arg => this.emitType(arg, builder))
+                    .join(', ');
+                builder.appendLine(`export class ${this.instance.Name}__LambdaClient<${genericArugments}> {`, indent);
+            } else {
+                builder.appendLine(`class ${this.instance.Name}__LambdaClient {`, indent);
+            }
             this.emitLambdaClientContructor(builder, indent + 1);
             for (let method of this.instance.Methods) {
                 this.emitLambdaClientMethod(builder, indent + 1, method);
@@ -405,6 +412,21 @@ module CodeGeneration {
             } else {
                 builder.appendLine(`public async ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)}): Promise<${this.emitType(method.ReturnType, builder)}> {`, indent);
             }
+            if (method.ReturnType.SystemType == 'void') {
+            builder.appendMultipleLines(
+`await this.__websocketService.InvokeServiceVoid({
+    Service: '${this.instance.Fullname.join('.')}',
+    Method: '${method.Name}',
+    GenericArguments: [],
+    Payload: {`, indent + 1);
+            for (let i = 0; i < method.Parameters.length; ++i) {
+                let parameter = method.Parameters[i];
+                builder.appendLine(`${parameter.Name}: ${parameter.Name}${(i < method.Parameters.length - 1) ? ',' : ''}`, indent + 3);
+            }
+            builder.appendMultipleLines(
+`    }
+}, this.__invokeType);`, indent + 1);
+            } else {
             builder.appendMultipleLines(
 `return await this.__websocketService.InvokeService({
     Service: '${this.instance.Fullname.join('.')}',
@@ -418,6 +440,7 @@ module CodeGeneration {
             builder.appendMultipleLines(
 `    }
 }, this.__invokeType);`, indent + 1);
+            }
             builder.appendLine(`}`, indent);
         }
         emitLambdaClientContructor(builder: CodeBuilder, indent: number) {

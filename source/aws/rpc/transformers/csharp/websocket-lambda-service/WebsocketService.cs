@@ -222,6 +222,21 @@ namespace UniRpc
                 return JsonSerializer.Deserialize<TReturn>(response.Payload.ToString());
             }
         }
+
+        public async Task InvokeService(BaseMessage message, string invokeType)
+        {
+            var functionName = Static.FindRoute(message.Service);
+            var response = await Static.lambda.InvokeAsync(new InvokeRequest
+            {
+                FunctionName = $"{Static.UniRpcApplication}--{functionName}--{Static.UniRpcEnvironmentTarget}",
+                InvocationType = invokeType,
+                Payload = JsonSerializer.Serialize(new APIGatewayProxyRequest
+                {
+                    RequestContext = context,
+                    Body = JsonSerializer.Serialize(message)
+                })
+            });
+        }
     }
 
     public class LogicTerminatedExecption : Exception {  }

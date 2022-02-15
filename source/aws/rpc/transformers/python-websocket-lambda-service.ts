@@ -428,11 +428,26 @@ module CodeGeneration {
                 let genericArugments = method.GenericArguments
                     .map(arg => this.emitType(arg, builder))
                     .join(', ');
-                    builder.appendLine(`async def ${method.Name}<${genericArugments}>(${this.emitMethodParameters(method.Parameters, builder, method)}) -> ${this.emitType(method.ReturnType, builder)}:`, indent);
+                    builder.appendLine(`async def ${method.Name}(${this.emitMethodParameters(method.Parameters, builder, method)}) -> ${this.emitType(method.ReturnType, builder)}:`, indent);
             } else {
                 builder.appendLine(`async def ${method.Name}(${this.emitMethodParameters(method.Parameters, builder, method)}) -> ${this.emitType(method.ReturnType, builder)}:`, indent);
             }
+            if (method.ReturnType.SystemType == 'void') {
+                builder.appendMultipleLines(
+`await self.WEBSOCKETSERVICEBASE__websocketService.InvokeServiceVoid({
+    'Service': '${this.instance.Fullname.join('.')}',
+    'Method': '${method.Name}',
+    'GenericArguments': [],
+    'Payload': {`, indent + 1);
+            for (let i = 0; i < method.Parameters.length; ++i) {
+                let parameter = method.Parameters[i];
+                builder.appendLine(`'${parameter.Name}': ${parameter.Name}${(i < method.Parameters.length - 1) ? ',' : ''}`, indent + 3);
+            }
             builder.appendMultipleLines(
+`    }
+}, self.WEBSOCKETSERVICEBASE__invokeType)`, indent + 1);
+            } else {
+                builder.appendMultipleLines(
 `return await self.WEBSOCKETSERVICEBASE__websocketService.InvokeService({
     'Service': '${this.instance.Fullname.join('.')}',
     'Method': '${method.Name}',
@@ -445,6 +460,8 @@ module CodeGeneration {
             builder.appendMultipleLines(
 `    }
 }, self.WEBSOCKETSERVICEBASE__invokeType)`, indent + 1);
+            }
+            
             builder.appendLine(``, indent + 1);
         }
         emitLambdaClientContructor(builder: CodeBuilder, indent: number) {

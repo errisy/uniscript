@@ -153,6 +153,18 @@ export class WebsocketService {
       return JSON.parse(response.Payload.toString());
     }
   }
+
+  async InvokeServiceVoid(message: BaseMessage, invokeType: 'Event' | 'RequestResponse'): Promise<void> {
+    let functionName: string = findRoute(message.Service);
+    let response = await (lambda.invoke({
+      FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
+      InvocationType: invokeType,
+      Payload: {
+        requestContext: this.context,
+        body: JSON.stringify(message)
+      }
+    }).promise());
+  }
 }
 
 export class LogicTerminationError extends Error { }

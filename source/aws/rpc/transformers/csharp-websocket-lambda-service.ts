@@ -314,7 +314,15 @@ module CodeGeneration {
             builder.appendLine(`}`, indent);
         }
         emitLambdaClient(builder: CodeBuilder, indent: number) {
-            builder.appendLine(`public class ${this.instance.Name}__LambdaClient {`, indent);
+            if (this.instance.IsGeneric) {
+                let genericArugments = this.instance.GenericArguments
+                    .map(arg => this.emitType(arg, builder))
+                    .join(', ');
+                builder.appendLine(`public class ${this.instance.Name}__LambdaClient<${genericArugments}>`, indent);
+            } else {
+                builder.appendLine(`public class ${this.instance.Name}__LambdaClient`, indent);
+            }
+            builder.appendLine(`{`, indent);
             builder.appendLine(`public WebsocketService __websocketService { get; protected set; }`, indent + 1);
             builder.appendLine(`public string __invokeType { get; protected set; }`, indent + 1);
             this.emitLambdaClientContructor(builder, indent + 1);
@@ -334,6 +342,21 @@ module CodeGeneration {
                 builder.appendLine(`public async ${this.emitReturnType(method.ReturnType, builder)} ${method.Name}(${this.emitMethodParameters(method.Parameters, builder)})`, indent);
             }
             builder.appendLine(`{`, indent);
+            if (method.ReturnType.SystemType == 'void') {
+            builder.appendMultipleLines(
+`await __websocketService.InvokeService(new BaseMessage {
+    Service = "${this.instance.Fullname.join('.')}",
+    Method = "${method.Name}",
+    GenericArguments = new string[] { },
+    Payload = (new {`, indent + 1);
+            for (let i = 0; i < method.Parameters.length; ++i) {
+                let parameter = method.Parameters[i];
+                builder.appendLine(`${parameter.Name} = ${parameter.Name}${(i < method.Parameters.length - 1) ? ',' : ''}`, indent + 3);
+            }
+            builder.appendMultipleLines(
+`    }).AsElement()
+}, __invokeType);`, indent + 1);
+            } else {
             builder.appendMultipleLines(
 `return await __websocketService.InvokeService<${this.emitType(method.ReturnType, builder)}>(new BaseMessage {
     Service = "${this.instance.Fullname.join('.')}",
@@ -347,6 +370,7 @@ module CodeGeneration {
             builder.appendMultipleLines(
 `    }).AsElement()
 }, __invokeType);`, indent + 1);
+            }
             builder.appendLine(`}`, indent);
         }
         emitLambdaClientContructor(builder: CodeBuilder, indent: number) {

@@ -1,11 +1,10 @@
 from typing import List, Coroutine, Any
 from abc import abstractmethod
 from UniRpc.BaseMessage import BaseMessage
-from UniRpc.WebsocketService import WebsocketService
 
 
 class WebsocketServiceBase:
-    WEBSOCKETSERVICEBASE__websocketService: WebsocketService
+    WEBSOCKETSERVICEBASE__websocketService: Any
     __reflection: str
     __isGeneric: bool
     __genericArguments: List[str]

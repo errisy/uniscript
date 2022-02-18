@@ -6,4 +6,5 @@ export interface BaseMessage {
     Payload: any;
     Success?: boolean;
     ErrorMessage?: string;
+    InvokeType?: string;
 }

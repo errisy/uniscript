@@ -9,3 +9,4 @@ class BaseMessage(TypedDict):
     Payload: str
     Success: bool
     ErrorMessage: str
+    InvokeType: str

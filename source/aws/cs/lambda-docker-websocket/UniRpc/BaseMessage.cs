@@ -11,5 +11,6 @@ namespace UniRpc
         public JsonElement Payload { get; set; }
         public bool Success { get; set; }
         public string ErrorMessage { get; set; }
+        public string InvokeType { get; set; }
     }
 }

@@ -41,6 +41,7 @@ class WebsocketService:
     services: Dict[str, WebsocketServiceBase] = dict()
     user: IWebSocketUser
     context: IRequestContext
+    message_id: str
 
     def RegisterService(self, service: WebsocketServiceBase) -> WebsocketService:
         service.WEBSOCKETSERVICEBASE__websocketService = self
@@ -67,12 +68,16 @@ class WebsocketService:
         if message['Service'] in self.services.keys():
             service = self.services[message['Service']]
             try:
+                self.message_id = message['Id']
                 result = await service.WEBSOCKETSERVICEBASE__invoke(message)
-                self.Respond(event['requestContext'], result)
-                return {
-                    'statusCode': 202,
-                    'body': 'Accepted'
-                }
+                if message['InvokeType'] == 'RequestResponse':
+                    return result
+                else:
+                    self.Respond(event['requestContext'], result)
+                    return {
+                        'statusCode': 202,
+                        'body': 'Accepted'
+                    }
             except LogicTerminationException as ex:
                 return {
                     'statusCode': 202,
@@ -139,28 +144,32 @@ class WebsocketService:
 
     async def InvokeService(self, message: BaseMessage, invoke_type: str) -> Any:
         function_name: str = find_route(message['Service'])
+        message['Id'] = self.message_id
+        message['InvokeType'] = invoke_type
         response = _lambda.invoke(
             FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
             InvocationType=invoke_type,
-            Payload={
+            Payload=json.dumps({
                 'requestContext': self.context,
                 'body': json.dumps(message)
-            }
+            })
         )
         if invoke_type == 'Event':
             return None
         else:
-            return json.loads(response['Payload'].decode('utf-8'))
+            return json.loads(response['Payload'].read())
 
     async def InvokeServiceVoid(self, message: BaseMessage, invoke_type: str) -> None:
         function_name: str = find_route(message['Service'])
+        message['Id'] = self.message_id
+        message['InvokeType'] = invoke_type
         response = _lambda.invoke(
             FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
             InvocationType=invoke_type,
-            Payload={
+            Payload=json.dumps({
                 'requestContext': self.context,
                 'body': json.dumps(message)
-            }
+            })
         )
 
 

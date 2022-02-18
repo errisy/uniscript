@@ -65,6 +65,7 @@ namespace UniRpc
         public Dictionary<string, WebsocketServiceBase> services = new Dictionary<string, WebsocketServiceBase>();
         public Dictionary<string, AttributeValue> user { get; set; }
         public APIGatewayProxyRequest.ProxyRequestContext context { get; set; }
+        public string messageId { get; set; }
         public WebsocketService RegisterService<T>(T service) where T : WebsocketServiceBase
         {
             if (services.ContainsKey(service.__reflection))
@@ -109,13 +110,18 @@ namespace UniRpc
                 var service = services[message.Service];
                 try
                 {
+                    this.messageId = message.Id;
                     var result = await service.__invoke(message);
-                    await Respond(_event.RequestContext, result);
-                    return new APIGatewayProxyResponse
-                    {
-                        StatusCode = 202,
-                        Body = "Accepted"
-                    };
+                    if (message.InvokeType == "RequestResponse") {
+                        return result;
+                    } else {
+                        await Respond(_event.RequestContext, result);
+                        return new APIGatewayProxyResponse
+                        {
+                            StatusCode = 202,
+                            Body = "Accepted"
+                        };
+                    }
                 }
                 catch (LogicTerminatedExecption noResponse)
                 {
@@ -203,6 +209,8 @@ namespace UniRpc
         public async Task<TReturn> InvokeService<TReturn>(BaseMessage message, string invokeType)
         {
             var functionName = Static.FindRoute(message.Service);
+            message.Id = this.messageId;
+            message.InvokeType = invokeType;
             var response = await Static.lambda.InvokeAsync(new InvokeRequest
             {
                 FunctionName = $"{Static.UniRpcApplication}--{functionName}--{Static.UniRpcEnvironmentTarget}",
@@ -226,6 +234,8 @@ namespace UniRpc
         public async Task InvokeService(BaseMessage message, string invokeType)
         {
             var functionName = Static.FindRoute(message.Service);
+            message.Id = this.messageId;
+            message.InvokeType = invokeType;
             var response = await Static.lambda.InvokeAsync(new InvokeRequest
             {
                 FunctionName = $"{Static.UniRpcApplication}--{functionName}--{Static.UniRpcEnvironmentTarget}",

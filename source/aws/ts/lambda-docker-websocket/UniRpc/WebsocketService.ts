@@ -34,6 +34,7 @@ export class WebsocketService {
   services: Map<string, WebsocketServiceBase> = new Map<string, WebsocketServiceBase>();
   user: IWebSocketUser;
   context: IRequestContext;
+  messageId: string;
 
   RegisterService<T extends WebsocketServiceBase>(service: T): this {
     service.__websocketService = this;
@@ -63,12 +64,17 @@ export class WebsocketService {
     if (this.services.has(message.Service)) {
       try {
         let service = this.services.get(message.Service);
+        this.messageId = message.Id;
         let result = await service.__invoke(message);
-        await this.Respond(event.requestContext, result);
-        return {
-          statusCode: 202,
-          body: 'Accepted'
-        };
+        if (message.InvokeType == 'RequestResponse') {
+          return result;
+        } else {
+          await this.Respond(event.requestContext, result);
+          return {
+            statusCode: 202,
+            body: 'Accepted'
+          };
+        }
       } catch (ex) {
         if (ex instanceof LogicTerminationError) {
           return {
@@ -139,6 +145,8 @@ export class WebsocketService {
   
   async InvokeService(message: BaseMessage, invokeType: 'Event' | 'RequestResponse'): Promise<any> {
     let functionName: string = findRoute(message.Service);
+    message.Id = this.messageId;
+    message.InvokeType = invokeType;
     let response = await (lambda.invoke({
       FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
@@ -156,6 +164,8 @@ export class WebsocketService {
 
   async InvokeServiceVoid(message: BaseMessage, invokeType: 'Event' | 'RequestResponse'): Promise<void> {
     let functionName: string = findRoute(message.Service);
+    message.Id = this.messageId;
+    message.InvokeType = invokeType;
     let response = await (lambda.invoke({
       FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,

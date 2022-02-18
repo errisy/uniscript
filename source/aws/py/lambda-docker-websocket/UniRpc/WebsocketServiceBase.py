@@ -1,16 +1,16 @@
 from typing import List, Coroutine, Any
 from abc import abstractmethod
 from UniRpc.BaseMessage import BaseMessage
-from UniRpc.WebsocketService import WebsocketService
 
 
 class WebsocketServiceBase:
-    WEBSOCKETSERVICEBASE__websocketService: WebsocketService
+    WEBSOCKETSERVICEBASE__websocketService: Any
     __reflection: str
     __isGeneric: bool
     __genericArguments: List[str]
     __user: str
     __group: str
+    __message_id: str
 
     def __getitem__(self, key: str):
         if key == '__reflection':
@@ -23,6 +23,8 @@ class WebsocketServiceBase:
             return self.__user
         elif key == '__group':
             return self.__group
+        elif key == '__message_id':
+            return self.__message_id
         elif key == 'WEBSOCKETSERVICEBASE__websocketService':
             return self.WEBSOCKETSERVICEBASE__websocketService
 
@@ -37,6 +39,8 @@ class WebsocketServiceBase:
             self.__user = value
         elif key == '__group':
             self.__group = value
+        elif key == '__message_id':
+            self.__message_id = value
         elif key == 'WEBSOCKETSERVICEBASE__websocketService':
             self.WEBSOCKETSERVICEBASE__websocketService = value
 

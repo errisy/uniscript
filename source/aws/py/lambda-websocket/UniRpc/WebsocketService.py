@@ -70,7 +70,7 @@ class WebsocketService:
             try:
                 self.message_id = message['Id']
                 result = await service.WEBSOCKETSERVICEBASE__invoke(message)
-                if message['InvokeType'] == 'RequestResponse':
+                if 'InvokeType' in message and message['InvokeType'] == 'RequestResponse':
                     return result
                 else:
                     self.Respond(event['requestContext'], result)

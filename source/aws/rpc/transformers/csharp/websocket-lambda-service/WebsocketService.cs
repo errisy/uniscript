@@ -79,7 +79,7 @@ namespace UniRpc
             return this;
         }
 
-        public async Task<APIGatewayProxyResponse> ProcessEvent(APIGatewayProxyRequest _event)
+        public async Task<object> ProcessEvent(APIGatewayProxyRequest _event)
         {
             context = _event.RequestContext;
             try

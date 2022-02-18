@@ -23,7 +23,7 @@ namespace LambdaEntry.Tests
             var context = new TestLambdaContext();
             var request = new APIGatewayProxyRequest();
             var response = await function.FunctionHandler(request, context);
-            Assert.Equal(202, response.StatusCode);
+            Assert.Equal(202, (response as APIGatewayProxyResponse).StatusCode);
         }
     }
 }

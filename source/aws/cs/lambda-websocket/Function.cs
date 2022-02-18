@@ -23,7 +23,7 @@ namespace LambdaEntry
         /// <param name="context"></param>
         /// <returns></returns>
         [LambdaSerializer(typeof(JsonSerializer))]
-        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
+        public async Task<object> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
         {
             Console.WriteLine("AWS Lambda Project \"@{project}\".");
             var websocketService = new WebsocketService();

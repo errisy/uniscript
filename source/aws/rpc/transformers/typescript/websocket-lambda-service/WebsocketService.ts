@@ -158,7 +158,7 @@ export class WebsocketService {
     if (invokeType == 'Event') {
       return undefined;
     } else {
-      return JSON.parse(response.Payload.toString());
+      return (JSON.parse(response.Payload.toString()) as BaseMessage).Payload;
     }
   }
 

@@ -227,7 +227,7 @@ namespace UniRpc
             }
             else
             {
-                return JsonSerializer.Deserialize<TReturn>(response.Payload.ToString());
+                return JsonSerializer.Deserialize<TReturn>(JsonSerializer.Deserialize<BaseMessage>(response.Payload.ToString()).Payload.GetRawText());
             }
         }
 

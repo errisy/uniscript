@@ -70,7 +70,7 @@ class WebsocketService:
             try:
                 self.message_id = message['Id']
                 result = await service.WEBSOCKETSERVICEBASE__invoke(message)
-                if  'InvokeType' in message and message['InvokeType'] == 'RequestResponse':
+                if 'InvokeType' in message and message['InvokeType'] == 'RequestResponse':
                     return result
                 else:
                     self.Respond(event['requestContext'], result)
@@ -157,7 +157,7 @@ class WebsocketService:
         if invoke_type == 'Event':
             return None
         else:
-            return json.loads(response['Payload'].read())
+            return json.loads(response['Payload'].read())['Payload']
 
     async def InvokeServiceVoid(self, message: BaseMessage, invoke_type: str) -> None:
         function_name: str = find_route(message['Service'])

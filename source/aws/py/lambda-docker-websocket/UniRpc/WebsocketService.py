@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Dict, Any, List
+import asyncio
 import json
 import boto3
 import os
@@ -72,6 +73,8 @@ class WebsocketService:
             try:
                 self.message_id = message['Id']
                 result = await service.WEBSOCKETSERVICEBASE__invoke(message)
+                if asyncio.iscoroutine(result['Payload']):
+                    raise ValueError("result['Payload'] is Coroutine and not JSON serializable.")
                 if 'InvokeType' in message and message['InvokeType'] == 'RequestResponse':
                     return result
                 else:

@@ -68,6 +68,7 @@ namespace UniRpc
         public string messageId { get; set; }
         public WebsocketService RegisterService<T>(T service) where T : WebsocketServiceBase
         {
+            service.__websocketService = this;
             if (services.ContainsKey(service.__reflection))
             {
                 services[service.__reflection] = service;
@@ -114,7 +115,7 @@ namespace UniRpc
                 var service = services[message.Service];
                 try
                 {
-                    this.messageId = message.Id;
+                    messageId = message.Id;
                     var result = await service.__invoke(message);
                     if (message.InvokeType == "RequestResponse") {
                         return result;
@@ -145,6 +146,10 @@ namespace UniRpc
                         Body = "Internal Server Error"
                     };
                 }
+            }
+            else
+            {
+                Console.Error.WriteLine($"Service \"{message.Service}\" is not found in [{string.Join(", ", services)}]");
             }
             return new APIGatewayProxyResponse
             {

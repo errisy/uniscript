@@ -99,6 +99,12 @@ export class WebsocketService {
           }
         }
       }
+    } else {
+      let services : string[] = []; 
+      for (let key of this.services.keys()){
+        services.push(key);
+      }
+      console.error(`Service "${message.Service}" is not found in [${services.join(', ')}].`)
     }
     return {
       statusCode: 403,

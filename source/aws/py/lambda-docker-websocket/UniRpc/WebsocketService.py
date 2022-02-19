@@ -56,6 +56,7 @@ class WebsocketService:
         try:
             self.user = await self.GetUser(event['requestContext'])
         except Exception as exception:
+            print('GetUser failed. Authentication Error.')
             print(exception)
             return {
                 'statusCode': 401,
@@ -95,6 +96,10 @@ class WebsocketService:
                     'statusCode': 500,
                     'body': 'Internal Server Error'
                 }
+        else:
+            service = message['Service']
+            services = '[' + ', '.join(self.services.keys()) + ']'
+            print(f'Service "{service}" is not found in {services}.')
         return {
             'statusCode': 403,
             'body': 'Forbidden'

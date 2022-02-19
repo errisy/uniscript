@@ -394,7 +394,7 @@ module CodeGeneration {
                     .join(', ');
                 builder.appendLine(`export class ${this.instance.Name}__LambdaClient<${genericArugments}> {`, indent);
             } else {
-                builder.appendLine(`class ${this.instance.Name}__LambdaClient {`, indent);
+                builder.appendLine(`export class ${this.instance.Name}__LambdaClient {`, indent);
             }
             this.emitLambdaClientContructor(builder, indent + 1);
             for (let method of this.instance.Methods) {
@@ -446,7 +446,7 @@ module CodeGeneration {
         emitLambdaClientContructor(builder: CodeBuilder, indent: number) {
             builder.appendLine(`public constructor (`, indent);
             builder.appendLine(`protected __websocketService: ${this.emitType(websocketServiceType, builder)},`, indent + 1);
-            builder.appendLine(`protected __invokeType: "Event" | "RequestResponse") {`, indent + 1);
+            builder.appendLine(`protected __invokeType: 'Event' | 'RequestResponse') {`, indent + 1);
             builder.appendLine(`}`, indent);
         }
     }

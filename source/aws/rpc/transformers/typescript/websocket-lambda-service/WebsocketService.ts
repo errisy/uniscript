@@ -43,6 +43,9 @@ export class WebsocketService {
   }
 
   async ProcessEvent(event: IWebsocketEvent) {
+    if (this.services.size == 0) {
+      console.warn('No Service is registered.');
+    }
     this.context = event.requestContext;
     try {
       this.user = await this.GetUser(event.requestContext);
@@ -148,12 +151,12 @@ export class WebsocketService {
     message.Id = this.messageId;
     message.InvokeType = invokeType;
     let response = await (lambda.invoke({
-      FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
+      FunctionName: `${UniRpcApplication}--${functionName}--${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
-      Payload: {
+      Payload: JSON.stringify({
         requestContext: this.context,
         body: JSON.stringify(message)
-      }
+      })
     }).promise());
     if (invokeType == 'Event') {
       return undefined;
@@ -167,12 +170,12 @@ export class WebsocketService {
     message.Id = this.messageId;
     message.InvokeType = invokeType;
     let response = await (lambda.invoke({
-      FunctionName: `${UniRpcApplication}--${functionName}-${UniRpcEnvironmentTarget}`,
+      FunctionName: `${UniRpcApplication}--${functionName}--${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
-      Payload: {
+      Payload: JSON.stringify({
         requestContext: this.context,
         body: JSON.stringify(message)
-      }
+      })
     }).promise());
   }
 }

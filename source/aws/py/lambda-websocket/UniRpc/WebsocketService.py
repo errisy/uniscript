@@ -49,6 +49,8 @@ class WebsocketService:
         return self
 
     async def ProcessEvent(self, event: IWebsocketEvent):
+        if len(self.services) == 0:
+            print('No Service is registered.')
         self.context = event['requestContext']
         try:
             self.user = await self.GetUser(event['requestContext'])
@@ -174,5 +176,5 @@ class WebsocketService:
 
 
 class LogicTerminationException(Exception):
-    def __init__(self, message: str):
+    def __init__(self, message: str = ''):
         super().__init__(message)

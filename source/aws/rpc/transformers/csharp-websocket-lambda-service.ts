@@ -75,7 +75,7 @@ module CodeGeneration {
                 if (TypeMappings.has(typeInstance.Reference.SystemType)) {
                     let name = TypeMappings.get(typeInstance.Reference.SystemType);
                     if (name.lastIndexOf('.') > -1) {
-                        builder.addImport(name.substr(0, name.lastIndexOf('.')));
+                        builder.addImport(name.substring(0, name.lastIndexOf('.')));
                     }
                     return name;
                 }

@@ -81,6 +81,10 @@ namespace UniRpc
 
         public async Task<object> ProcessEvent(APIGatewayProxyRequest _event)
         {
+            if (!services.Any())
+            {
+                Console.Error.WriteLine("No Service is registered.");
+            }
             context = _event.RequestContext;
             try
             {

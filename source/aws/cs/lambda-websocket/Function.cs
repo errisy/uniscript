@@ -22,7 +22,7 @@ namespace LambdaEntry
         /// <param name="input"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        [LambdaSerializer(typeof(JsonSerializer))]
+        [LambdaSerializer(typeof(FunctionJsonSerializer))]
         public async Task<object> FunctionHandler(APIGatewayProxyRequest input, ILambdaContext context)
         {
             Console.WriteLine("AWS Lambda Project \"@{project}\".");

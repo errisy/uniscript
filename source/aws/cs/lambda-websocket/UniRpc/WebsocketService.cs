@@ -204,7 +204,7 @@ namespace UniRpc
             var agm = new AmazonApiGatewayManagementApiClient(
                 new AmazonApiGatewayManagementApiConfig()
                 {
-                    ServiceURL = $"{context.DomainName}/{context.Stage}"
+                    ServiceURL = $"https://{context.DomainName}/{context.Stage}"
                 }
             );
             var stringData = JsonSerializer.Serialize(data);
@@ -236,16 +236,17 @@ namespace UniRpc
             }
             else
             {
-                return JsonSerializer.Deserialize<TReturn>(JsonSerializer.Deserialize<BaseMessage>(response.Payload.ToString()).Payload.GetRawText());
+                using var payloadReader = new StreamReader(response.Payload, Encoding.UTF8);
+                return JsonSerializer.Deserialize<TReturn>(JsonSerializer.Deserialize<BaseMessage>(payloadReader.ReadToEnd()).Payload.GetRawText());
             }
         }
 
         public async Task InvokeService(BaseMessage message, string invokeType)
         {
             var functionName = Static.FindRoute(message.Service);
-            message.Id = this.messageId;
+            message.Id = messageId;
             message.InvokeType = invokeType;
-            var response = await Static.lambda.InvokeAsync(new InvokeRequest
+            await Static.lambda.InvokeAsync(new InvokeRequest
             {
                 FunctionName = $"{Static.UniRpcApplication}--{functionName}--{Static.UniRpcEnvironmentTarget}",
                 InvocationType = invokeType,

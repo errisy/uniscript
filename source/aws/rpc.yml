@@ -12,12 +12,12 @@ script:
       source: "@{baseUrl}"
       destination: '@{project}/'
       copy:
-      - MyService1.ts
-      - MyService2.ts
-      - MyUsers.ts
-      - CsService.ts
-      - PyService.ts
-      - TsService.ts
+      # - MyService1.ts
+      # - MyService2.ts
+      # - MyUsers.ts
+      # - CsService.ts
+      # - PyService.ts
+      # - TsService.ts
       - package.json
       - transformers/add.test.ts
       - transformers/add.ts
@@ -71,8 +71,8 @@ script:
       - transformers/typescript/websocket-lambda-service/WebsocketServiceBase.ts
       - transformers/typescript-websocket-angular-client.ts
       - transformers/typescript-websocket-lambda-service.ts
-      - transformers/uni-rpc.json
-      - transformers/uni-rpc.yaml
+      # - transformers/uni-rpc.json
+      # - transformers/uni-rpc.yaml
       - transformers/users-cognito.ts
       - tsconfig.json
       - '?uni-rpc.yaml'

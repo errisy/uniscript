@@ -8,7 +8,9 @@ export async function handler (event: IWebsocketEvent) {
     let websocketService = new WebsocketService();
     // Register your service implementations here.
     // websocketService.RegisterService(new Namespace.ServiceImpl());
-    return await websocketService.ProcessEvent(event);
+    let response = await websocketService.ProcessEvent(event);
+    console.log('Function Response:', response);
+    return response;
 };
 
 // Entry point fo the process

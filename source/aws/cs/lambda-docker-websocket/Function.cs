@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using Amazon.Lambda.Core;
 using Amazon.Lambda.APIGatewayEvents;
-using Amazon.Lambda.Serialization.Json;
 
 using UniRpc;
 
@@ -30,7 +28,9 @@ namespace LambdaEntry
             var websocketService = new WebsocketService();
             // Register your service implementations here.
             // websocketService.RegisterService(new Namespace.Service());
-            return await websocketService.ProcessEvent(input);
+            var response = await websocketService.ProcessEvent(input);
+            Console.WriteLine($"Function Response: {JsonSerializer.Serialize(response)}");
+            return response;
         }
     }
 }

@@ -101,6 +101,7 @@ namespace UniRpc
                 };
             }
             BaseMessage message = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
+            Console.WriteLine($"Input Message: {_event.Body}");
             string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
             if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
@@ -218,7 +219,7 @@ namespace UniRpc
         public async Task<TReturn> InvokeService<TReturn>(BaseMessage message, string invokeType)
         {
             var functionName = Static.FindRoute(message.Service);
-            message.Id = this.messageId;
+            message.Id = messageId;
             message.InvokeType = invokeType;
             var response = await Static.lambda.InvokeAsync(new InvokeRequest
             {

@@ -63,6 +63,7 @@ class WebsocketService:
                 'body': 'Unauthorized'
             }
         message: BaseMessage = json.loads(event['body'])
+        print('Input Message:', event['body'])
         groups: List[str] = json.loads(self.user['Groups']['S'])
         if not GroupClausesAuthorize(groups, message['Service'], message['Method']):
             return {

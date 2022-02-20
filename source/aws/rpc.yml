@@ -27,6 +27,7 @@ script:
       - transformers/csharp/websocket-service/WebSocketService.cs
       - transformers/csharp/websocket-service/WebSocketServiceBase.cs
       - transformers/csharp/websocket-lambda-service/BaseMessage.cs
+      - transformers/csharp/websocket-lambda-service/FunctionJsonSerializer.cs
       - transformers/csharp/websocket-lambda-service/GroupAuthorizations.cs
       - transformers/csharp/websocket-lambda-service/LambdaWebsocketTypes.cs
       - transformers/csharp/websocket-lambda-service/ReturnMessage.cs

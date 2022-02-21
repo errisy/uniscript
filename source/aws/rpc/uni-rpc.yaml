@@ -1,17 +1,17 @@
-rpc:
-- cs: '../cs-lbd-ws-1/'
-  type: websocket-lambda-service
-- ts: '../cdn-ng1/src/app/'
-  type: websocket-angular-client
-- ts: '../ts-lbd-ws-1/'
-  type: websocket-lambda-service
-- ts: '../ts-lbdc-ws-1/'
-  type: websocket-lambda-service
-- py: '../py-lbd-ws-1/'
-  type: websocket-lambda-service
-- py: '../py-lbdc-ws-1/'
-  type: websocket-lambda-service
-- users: '../users'
-  type: cognito
-- py: '../py-lbdc-ivk-1/'
-  type: websocket-lambda-service
+# rpc:
+# - cs: '../cs-lbd-ws-1/'
+#   type: websocket-lambda-service
+# - ts: '../cdn-ng1/src/app/'
+#   type: websocket-angular-client
+# - ts: '../ts-lbd-ws-1/'
+#   type: websocket-lambda-service
+# - ts: '../ts-lbdc-ws-1/'
+#   type: websocket-lambda-service
+# - py: '../py-lbd-ws-1/'
+#   type: websocket-lambda-service
+# - py: '../py-lbdc-ws-1/'
+#   type: websocket-lambda-service
+# - users: '../users'
+#   type: cognito
+# - py: '../py-lbdc-ivk-1/'
+#   type: websocket-lambda-service

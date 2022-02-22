@@ -41,6 +41,8 @@ class WebsocketService:
     tracking: Dict[str, Any] = dict()
     services: Dict[str, WebsocketServiceBase] = dict()
     user: IWebSocketUser
+    username: str
+    groups: List[str]
     context: IRequestContext
     message_id: str
 
@@ -64,8 +66,9 @@ class WebsocketService:
             }
         message: BaseMessage = json.loads(event['body'])
         print('Input Message:', event['body'])
-        groups: List[str] = json.loads(self.user['Groups']['S'])
-        if not GroupClausesAuthorize(groups, message['Service'], message['Method']):
+        self.username = self.user['Username']['S']
+        self.groups = json.loads(self.user['Groups']['S'])
+        if not GroupClausesAuthorize(self.groups, message['Service'], message['Method']):
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'

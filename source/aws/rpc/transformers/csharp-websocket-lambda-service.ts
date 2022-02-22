@@ -291,7 +291,7 @@ module CodeGeneration {
                 builder.appendLine(`case "${method.Name}":`, caseIndent);
                 builder.appendLine(`{`, blockIndent);
                 for (let parameter of method.Parameters) {
-                    if (parameter.Type.Reference.IsGenericPlaceholder && !parameter.Type.Reference.IsClassGenericPlaceholder) {
+                    if (!parameter.Type.IsGeneric && parameter.Type.Reference.IsGenericPlaceholder && !parameter.Type.Reference.IsClassGenericPlaceholder) {
                         builder.appendLine(`object ____${parameter.Name} = message.Payload.GetPropertyByReflection("${parameter.Name}");`, contentIndent)
                     } else {
                         let parameterType = this.emitType(parameter.Type, builder);

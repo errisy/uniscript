@@ -64,6 +64,8 @@ namespace UniRpc
 
         public Dictionary<string, WebsocketServiceBase> services = new Dictionary<string, WebsocketServiceBase>();
         public Dictionary<string, AttributeValue> user { get; set; }
+        public string username { get; set; }
+        public string[] groups { get; set; }
         public APIGatewayProxyRequest.ProxyRequestContext context { get; set; }
         public string messageId { get; set; }
         public WebsocketService RegisterService<T>(T service) where T : WebsocketServiceBase
@@ -102,7 +104,8 @@ namespace UniRpc
             }
             BaseMessage message = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
             Console.WriteLine($"Input Message: {_event.Body}");
-            string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
+            username = user[IWebSocketUser.Username].S;
+            groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
             if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
                 return new APIGatewayProxyResponse

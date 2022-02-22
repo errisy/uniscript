@@ -33,6 +33,8 @@ export class WebsocketService {
   tracking: {[serial: string]: any} = {};
   services: Map<string, WebsocketServiceBase> = new Map<string, WebsocketServiceBase>();
   user: IWebSocketUser;
+  username: string;
+  groups: string[];
   context: IRequestContext;
   messageId: string;
 
@@ -58,8 +60,9 @@ export class WebsocketService {
     }
     let message: BaseMessage = JSON.parse(event.body);
     console.log(`Input Message: ${event.body}`);
-    let groups: string[] = JSON.parse(this.user.Groups.S);
-    if (!GroupClausesAuthorize(groups, message.Service, message.Method)) {
+    this.username = this.user.Username.S;
+    this.groups = JSON.parse(this.user.Groups.S);
+    if (!GroupClausesAuthorize(this.groups, message.Service, message.Method)) {
       return {
         statusCode: 401,
         body: 'Unauthorized'

@@ -391,7 +391,7 @@ module CodeGeneration {
                     builder.appendLine(`elif method == '${method.Name}':`, conditionIndent);
                 }
                 for (let parameter of method.Parameters) {
-                    if (parameter.Type.Reference.IsGenericPlaceholder && !parameter.Type.Reference.IsClassGenericPlaceholder) {
+                    if (!parameter.Type.IsGeneric && parameter.Type.Reference.IsGenericPlaceholder && !parameter.Type.Reference.IsClassGenericPlaceholder) {
                         builder.appendLine(`____${parameter.Name}: any = message['Payload']['${parameter.Name}']`, contentIndent)
                     } else {
                         let parameterType = this.emitType(parameter.Type, builder);

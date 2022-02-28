@@ -77,6 +77,8 @@ class WebsocketService:
             service = self.services[message['Service']]
             try:
                 self.message_id = message['Id']
+                service['__user'] = self.username
+                service['__groups'] = self.groups
                 result = await service.WEBSOCKETSERVICEBASE__invoke(message)
                 if asyncio.iscoroutine(result['Payload']):
                     raise ValueError("result['Payload'] is Coroutine and not JSON serializable.")

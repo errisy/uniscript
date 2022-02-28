@@ -61,6 +61,7 @@ script:
       - transformers/typescript/websocket-angular-client/GroupAuthorizations.ts
       - transformers/typescript/websocket-angular-client/local-storage.service.ts
       - transformers/typescript/websocket-angular-client/token-holder.service.ts
+      - transformers/typescript/websocket-angular-client/ReflectionsBase.ts
       - transformers/typescript/websocket-angular-client/WebsocketService.ts
       - transformers/typescript/websocket-angular-client/WebsocketServiceBase.ts
       - transformers/typescript/websocket-lambda-service/BaseMessage.ts

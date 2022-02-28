@@ -9,7 +9,8 @@ class WebsocketServiceBase:
     __isGeneric: bool
     __genericArguments: List[str]
     __user: str
-    __group: str
+    __groups: List[str]
+    __message_id: str
 
     def __getitem__(self, key: str):
         if key == '__reflection':
@@ -20,8 +21,8 @@ class WebsocketServiceBase:
             return self.__genericArguments
         elif key == '__user':
             return self.__user
-        elif key == '__group':
-            return self.__group
+        elif key == '__groups':
+            return self.__groups
         elif key == 'WEBSOCKETSERVICEBASE__websocketService':
             return self.WEBSOCKETSERVICEBASE__websocketService
 
@@ -34,8 +35,8 @@ class WebsocketServiceBase:
             self.__genericArguments = value
         elif key == '__user':
             self.__user = value
-        elif key == '__group':
-            self.__group = value
+        elif key == '__groups':
+            self.__groups = value
         elif key == 'WEBSOCKETSERVICEBASE__websocketService':
             self.WEBSOCKETSERVICEBASE__websocketService = value
 

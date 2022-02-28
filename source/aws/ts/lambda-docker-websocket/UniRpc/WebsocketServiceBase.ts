@@ -9,7 +9,6 @@ export abstract class WebsocketServiceBase
     __genericArguments: string[];
     abstract __outgoing(message: BaseMessage): void;
     __user: string;
-    __group: string;
-    __message_id: string;
+    __groups: string[];
     abstract __invoke(message: BaseMessage): Promise<BaseMessage>;
 }

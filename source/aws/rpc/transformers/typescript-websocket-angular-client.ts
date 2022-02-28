@@ -24,6 +24,8 @@ export class Transpiler {
                 let groups = new CodeGeneration.GroupAuthorizationsEmitter(this.resolver.Groups);
                 groups.emitFile(rootDirectory);
             }
+            let reflections = new CodeGeneration.ReflectionsEmitter(this.resolver.Children);
+            reflections.emitFile(rootDirectory);
         }
     }
     private copyBaseFiles(rootDirectory: string) {
@@ -86,6 +88,13 @@ module CodeGeneration {
     baseMessageType.ServiceReference.Name = 'BaseMessage';
     baseMessageType.ServiceReference.Fullname = baseMessageType.FullName;
     baseMessageType.Reference = baseMessageType;
+
+    const reflectionsBaseType = new Type('ReflectionsBase');
+    reflectionsBaseType.FullName = ['UniRpc', 'ReflectionsBase'];
+    reflectionsBaseType.ServiceReference = new Service();
+    reflectionsBaseType.ServiceReference.Name = 'ReflectionsBase';
+    reflectionsBaseType.ServiceReference.Fullname = reflectionsBaseType.FullName;
+    reflectionsBaseType.Reference = reflectionsBaseType;
 
     export function mapType(typeInstance: Type, builder: CodeBuilder, fullname: string[]): string {
         if (typeInstance.IsGenericPlaceholder) {
@@ -431,6 +440,9 @@ module CodeGeneration {
             builder.appendLine(`{`, indent);
             let fullname = this.instance.Fullname.join('.');
             builder.appendLine(`__reflection: string = '${fullname}';`, indent + 1);
+            builder.appendLine(`__new?: boolean;`, indent + 1);
+            builder.appendLine(`__changed?: boolean;`, indent + 1);
+            builder.appendLine(`__snapshot?: ${this.instance.Name};`, indent + 1);
             for (let property of this.instance.Properties) {
                 this.emitProperty(builder, indent + 1, property);
             }
@@ -547,6 +559,67 @@ module CodeGeneration {
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
             return CodeGeneration.mapType(typeInstance, builder, this.instance.Fullname);
+        }
+    }
+
+    export class ReflectionsEmitter {
+        constructor (private namsespaces: Map<string, Namespace>) {}
+        emitFile(rootDirectory: string) {
+            let filename = path.join(rootDirectory, 'UniRpc/Reflections.ts');
+            let builder: CodeBuilder = new CodeBuilder(importBuilder);
+            let indent = 0;
+            this.emitRelections(builder, indent);
+            console.log('Write Code to:', filename);
+            WriteFile(filename, builder.build(), 'utf-8');
+        }
+        emitRelections(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`class Reflections extends ${this.emitType(reflectionsBaseType, builder)} {`, indent);
+            builder.appendLine(`constructor() {`, indent + 1);
+            builder.appendLine(`super();`, indent + 2);
+            for (let instance of this.namsespaces.values()) {
+                for (let message of instance.Messages.values()) {
+                    builder.appendLine(`this.Register({`, indent + 2);
+                    builder.appendLine(`Name: '${message.Fullname.join('.')}',`, indent + 3);
+                    if (message.Properties.length == 0) {
+                        builder.appendLine(`Properties: [],`, indent + 3);
+                    } else {
+                        builder.appendLine(`Properties: [`, indent + 3);
+                        for (let index = 0; index < message.Properties.length; ++index) {
+                            let property = message.Properties[index];
+                            builder.appendLine(`{`, indent + 4);
+                            builder.appendLine(`Name: '${property.Name}',`, indent + 5);
+                            builder.appendLine(`Type: '${this.emitReflectionType(property.Type)}'`, indent + 5);
+                            builder.appendLine(`}${(index < message.Properties.length - 1 ? ',': '')}`, indent + 4);
+                        }
+                        builder.appendLine(`],`, indent + 3);
+                    }
+                    if (message.GenericArguments.length == 0) {
+                        builder.appendLine(`GenericArguments: []`, indent + 3);
+                    } else {
+                        builder.appendLine(`GenericArguments: [`, indent + 3);
+                        for (let index = 0; index < message.GenericArguments.length; ++index) {
+                            let genericArgument = message.GenericArguments[index];
+                            builder.appendLine(`'${genericArgument.Name}'`, indent + 4);
+                        }
+                        builder.appendLine(`]`, indent + 3);
+                    }
+                    builder.appendLine(`});`, indent + 2);
+                }
+            }
+            builder.appendLine(`}`, indent + 1);
+            builder.appendLine(`}`, indent);
+            builder.appendLine(``, indent);
+            builder.appendLine(`export const MessageReflections = new Reflections();`, indent);
+        }
+        emitType(typeInstance: Type, builder: CodeBuilder) {
+            return CodeGeneration.mapType(typeInstance, builder, ['UniRpc', 'Reflections']);
+        }
+        emitReflectionType(typeInstance: Type): string {
+            if (typeInstance.IsGeneric) {
+                return `${typeInstance.FullName.join('.')}<${typeInstance.GenericArguments.map(genericArgumentType => this.emitReflectionType(genericArgumentType)).join(',')}>`;
+            } else {
+                return typeInstance.FullName.join('.');
+            }
         }
     }
 

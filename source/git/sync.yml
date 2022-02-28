@@ -2,6 +2,8 @@ script:
   steps:
   - name: git sync
     pre: |
-      $['message'] = $['arg0'] || 'Unnamed Commit';
-    cmd: git add -A && git commit -a -m "@{message}" && git pull && git push
+      $['directory'] = $['arg0'] || '-a';
+      $['addDirectory'] = $['arg0'] || '-A';
+      $['message'] = $['arg1'] || ('Unnamed Commit' + ($['arg0'] ? ' of ' + $['arg0'] : ''));
+    cmd: git add @{addDirectory} && git commit @{directory} -m "@{message}" && git pull && git push
     ignoreError: True

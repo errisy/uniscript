@@ -176,6 +176,11 @@ export async function handler (event: IEvent<IBodyBase>) {
             let tokenData = decodeJWT(token);
             let jwkUrl = `https://cognito-idp.${region}.amazonaws.com/${UserPoolId}/.well-known/jwks.json`
             let jwks = await downloadJSON(jwkUrl) as JsonWebKeys;
+            if ('message' in jwks &&  /User pool ([\w-]+) does not exist\./ig.test(jwks['message'])) {
+                console.error(jwks['message']);
+                console.warn(`Please rerun CI/CD to deploy this websocket service, so that the UserPoolId environmental variable can be updated.`).
+                throw new Error(jwks['message']);
+            }
             let jwk: jwkToPem.JWK = matchJWK(tokenData.header, jwks) as any;
             // console.log(`connecting: token: ${tokenData}`);
             let pem = jwkToPem(jwk);

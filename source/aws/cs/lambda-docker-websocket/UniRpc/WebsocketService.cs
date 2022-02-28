@@ -120,6 +120,8 @@ namespace UniRpc
                 try
                 {
                     messageId = message.Id;
+                    message.__user = username;
+                    message.__groups = groups;
                     var result = await service.__invoke(message);
                     if (message.InvokeType == "RequestResponse") {
                         return result;

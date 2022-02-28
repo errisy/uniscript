@@ -72,6 +72,8 @@ export class WebsocketService {
       try {
         let service = this.services.get(message.Service);
         this.messageId = message.Id;
+        service.__user = this.username;
+        service.__groups = this.groups;
         let result = await service.__invoke(message);
         if (message.InvokeType == 'RequestResponse') {
           return result;

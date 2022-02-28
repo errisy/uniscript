@@ -1,6 +1,7 @@
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
 import { TokenHolder } from "./token-holder.service";
 import { environment } from '../../environments/environment';
+import { Injectable } from "@angular/core";
 
 export class GuardBase implements CanActivate {
     constructor(public token: TokenHolder, public router: Router) {}
@@ -50,4 +51,21 @@ export class GuardBase implements CanActivate {
         }
     }
     check = () => false;
+}
+
+export function GroupsGuard(...groups: string[]) {
+    return 
+    (class extends GuardBase {
+        constructor(public token: TokenHolder, public router: Router) {
+            super(token, router);
+        }
+        check = () => {
+            if  (this.token.Access && (this.token.Expires >= Date.now())) {
+                for (let group of groups) {
+                    if (this.token.Groups.includes(group)) return true;
+                }
+            }
+            return false;
+        };
+    });
 }

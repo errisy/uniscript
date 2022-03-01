@@ -84,24 +84,24 @@ Resources:
         - '@{localRedirectUrl}'
         # Enable below to allow redirect to CloudFront hosted UI
         # - Fn::Sub:
-        #     - 'https://${CloudFrontId}.cloudfront.net'
+        #     - 'https://${CloudFrontId}'
         #     - CloudFrontId: 
         #         Fn::Transform:
         #           Name: '@{AzureUtil}--cloudformation-utils'
         #           Parameters:
         #             InputString: !Sub 'S3CloudFrontDistribution@${Application}--[ui-project]--${AWSRegion}--${EnvironmentTarget}'
-        #             Operation: Stack
+        #             Operation: StackCloudFrontUrl
       LogoutURLs: 
         - '@{localRedirectUrl}'
         # Enable below to allow redirect to CloudFront hosted UI
         # - Fn::Sub:
-        #     - 'https://${CloudFrontId}.cloudfront.net'
+        #     - 'https://${CloudFrontId}'
         #     - CloudFrontId: 
         #         Fn::Transform:
         #           Name: '@{AzureUtil}--cloudformation-utils'
         #           Parameters:
         #             InputString: !Sub 'S3CloudFrontDistribution@${Application}--[ui-project]--${AWSRegion}--${EnvironmentTarget}'
-        #             Operation: Stack
+        #             Operation: StackCloudFrontUrl
       # default unit is hours
       AccessTokenValidity: 24
       # default unit is days

@@ -223,6 +223,22 @@ module CodeGeneration {
         }
     }
 
+    function emitPropertyComments(builder: CodeBuilder, indent: number, comments?: string) {
+        if (typeof comments != 'string') return;
+        let lines = comments.split('\n');
+        if (lines.length == 1) {
+            builder.appendLine(`# ${lines[0]}`, indent);
+        } else if (lines.length > 1) {
+            comments.split('\n')
+                .map(line => line.replace(/^\s*/ig, ''))
+                .map(line => line.replace(/\s*$/ig, ''))
+                .map(line => line)
+                .forEach(line => {
+                    builder.appendLine(`# ${line}`, indent);
+                });
+        }
+    }
+
     function emitMethodComments(builder: CodeBuilder, indent: number, method: Method) {
         if (method.Comments || method.Parameters.reduce((prev, arg) => prev + (arg.Comments ? 1 : 0), 0) > 0) {
             builder.appendLine(`'''`, indent);
@@ -532,7 +548,7 @@ module CodeGeneration {
         emitProperty(builder: CodeBuilder, indent: number, property: Property) {
             let name = property.Name, type = this.emitType(property.Type, builder);
             builder.appendLine(`${name}: ${type}`, indent);
-            emitComments(builder, indent, property.Comments);
+            emitPropertyComments(builder, indent, property.Comments);
         }
         emitType(typeInstance: Type, builder: CodeBuilder) {
             return CodeGeneration.mapType(typeInstance, builder, this.instance.Fullname);

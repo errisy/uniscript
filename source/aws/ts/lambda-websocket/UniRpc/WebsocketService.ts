@@ -119,22 +119,31 @@ export class WebsocketService {
   }
 
   async GetUser(context: IRequestContext): Promise<IWebSocketUser> {
-    let connectionResponse = await (dynamo.getItem({
+    let match: RegExpExecArray | null;
+    if (match =  /^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$/ig.exec(context.connectionId)) {
+        let websocketUser: IWebSocketUser = {
+          Username: { S: match[1] },
+          Groups: { S: JSON.stringify(match[1].split(',')) } 
+        } as any;
+        return websocketUser;
+    } else {
+      let connectionResponse = await (dynamo.getItem({
         TableName: WebSocketConnectionsTable,
         Key: {
             ConnectionId: { S: context.connectionId }
         }
-    }).promise());
-    if(!connectionResponse.Item) throw new Error(`No Connection was found for Connection Id ${context.connectionId}`);
-    let connection: IWebSocketConnection = connectionResponse.Item as any;
-    let userResponse = await (dynamo.getItem({
-        TableName: WebSocketUsersTable,
-        Key: {
-            Username: { S: connection.Username.S }
-        }
-    }).promise());
-    if(!userResponse.Item) throw new Error(`No user was found for User Id ${connection.Username.S} via Connection Id ${context.connectionId}`);
-    return userResponse.Item as any;
+      }).promise());
+      if(!connectionResponse.Item) throw new Error(`No Connection was found for Connection Id ${context.connectionId}`);
+      let connection: IWebSocketConnection = connectionResponse.Item as any;
+      let userResponse = await (dynamo.getItem({
+          TableName: WebSocketUsersTable,
+          Key: {
+              Username: { S: connection.Username.S }
+          }
+      }).promise());
+      if(!userResponse.Item) throw new Error(`No user was found for User Id ${connection.Username.S} via Connection Id ${context.connectionId}`);
+      return userResponse.Item as any;
+    }
   }
 
   async RespondUnauthorized(event: IWebsocketEvent, message: BaseMessage) {

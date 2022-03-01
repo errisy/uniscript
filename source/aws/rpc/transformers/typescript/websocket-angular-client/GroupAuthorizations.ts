@@ -52,20 +52,3 @@ export class GuardBase implements CanActivate {
     }
     check = () => false;
 }
-
-export function GroupsGuard(...groups: string[]) {
-    return 
-    (class extends GuardBase {
-        constructor(public token: TokenHolder, public router: Router) {
-            super(token, router);
-        }
-        check = () => {
-            if  (this.token.Access && (this.token.Expires >= Date.now())) {
-                for (let group of groups) {
-                    if (this.token.Groups.includes(group)) return true;
-                }
-            }
-            return false;
-        };
-    });
-}

@@ -221,7 +221,7 @@ export class ReflectionsBase {
         (value as any)['__snapshot'] = this.Clone(value);
         delete (value as any)['__new'];
         delete (value as any)['__changed'];
-        return (value as any)['__snapshot'];
+        return value;
     }
 
     Clone<T>(value: T): T {

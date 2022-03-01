@@ -58,6 +58,10 @@ Resources:
             QueryString: true
           ViewerProtocolPolicy: redirect-to-https
         CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 100
           - ErrorCode: 404
             ResponseCode: 200
             ResponsePagePath: /index.html

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
@@ -64,8 +65,6 @@ namespace UniRpc
 
         public Dictionary<string, WebsocketServiceBase> services = new Dictionary<string, WebsocketServiceBase>();
         public Dictionary<string, AttributeValue> user { get; set; }
-        public string username { get; set; }
-        public string[] groups { get; set; }
         public APIGatewayProxyRequest.ProxyRequestContext context { get; set; }
         public string messageId { get; set; }
         public WebsocketService RegisterService<T>(T service) where T : WebsocketServiceBase
@@ -104,8 +103,7 @@ namespace UniRpc
             }
             BaseMessage message = JsonSerializer.Deserialize<BaseMessage>(_event.Body);
             Console.WriteLine($"Input Message: {_event.Body}");
-            username = user[IWebSocketUser.Username].S;
-            groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
+            string[] groups = JsonSerializer.Deserialize<string[]>(user[IWebSocketUser.Groups].S);
             if (!Static.GroupClausesAuthorize(groups, message.Service, message.Method))
             {
                 return new APIGatewayProxyResponse
@@ -120,8 +118,6 @@ namespace UniRpc
                 try
                 {
                     messageId = message.Id;
-                    message.__user = username;
-                    message.__groups = groups;
                     var result = await service.__invoke(message);
                     if (message.InvokeType == "RequestResponse") {
                         return result;
@@ -166,32 +162,49 @@ namespace UniRpc
 
         public async Task<Dictionary<string, AttributeValue>> GetUser(APIGatewayProxyRequest.ProxyRequestContext context)
         {
-            var connectionResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest
+            var match = Regex.Match(context.ConnectionId, @"^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$");
+            if (match.Success)
+            {
+                var websocketUser = new Dictionary<string, AttributeValue>();
+                websocketUser.Add("Username", new AttributeValue
                 {
-                    TableName = Static.WebSocketConnectionsTable,
-                    Key = new Dictionary<string, AttributeValue> {
+                    S = match.Groups[1].Value
+                });
+                websocketUser.Add("Groups", new AttributeValue
+                {
+                    S = JsonSerializer.Serialize(match.Groups[2].Value.Split(","))
+                });
+                return websocketUser;
+            }
+            else
+            {
+                var connectionResponse = await Static.dynamo.GetItemAsync(
+                                new GetItemRequest
+                                {
+                                    TableName = Static.WebSocketConnectionsTable,
+                                    Key = new Dictionary<string, AttributeValue> {
                     { "ConnectionId", new AttributeValue { S = context.ConnectionId } }
-                }
-                });
-            if (connectionResponse.Item == null)
-            {
-                throw new Exception($"No Connection was found for Connection Id {context.ConnectionId}");
-            }
-            Dictionary<string, AttributeValue> connection = connectionResponse.Item;
-            var userResponse = await Static.dynamo.GetItemAsync(
-                new GetItemRequest
+                                }
+                                });
+                if (connectionResponse.Item == null)
                 {
-                    TableName = Static.WebSocketUsersTable,
-                    Key = new Dictionary<string, AttributeValue> {
+                    throw new Exception($"No Connection was found for Connection Id {context.ConnectionId}");
+                }
+                Dictionary<string, AttributeValue> connection = connectionResponse.Item;
+                var userResponse = await Static.dynamo.GetItemAsync(
+                    new GetItemRequest
+                    {
+                        TableName = Static.WebSocketUsersTable,
+                        Key = new Dictionary<string, AttributeValue> {
                         {  "Username", new AttributeValue{ S = connection[IWebSocketUser.Username].S } }
-                    }
-                });
-            if (userResponse.Item == null)
-            {
-                throw new Exception($"No user was found for User Id {connection[IWebSocketUser.Username].S} via Connection Id {context.ConnectionId}");
+                        }
+                    });
+                if (userResponse.Item == null)
+                {
+                    throw new Exception($"No user was found for User Id {connection[IWebSocketUser.Username].S} via Connection Id {context.ConnectionId}");
+                }
+                return userResponse.Item;
             }
-            return userResponse.Item;
         }
 
         public async Task RespondUnauthorized(APIGatewayProxyRequest _event, BaseMessage message)

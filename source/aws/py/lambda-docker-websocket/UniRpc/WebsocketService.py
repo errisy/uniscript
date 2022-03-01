@@ -5,6 +5,7 @@ import json
 import boto3
 import os
 import traceback
+import re
 
 from UniRpc.WebsocketServiceBase import WebsocketServiceBase
 from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
@@ -112,30 +113,37 @@ class WebsocketService:
         }
 
     async def GetUser(self, context: IRequestContext):
-        connectionId = context['connectionId']
-        connectionResponse: Dict[str, Any] = dynamo.get_item(
-            TableName=WebSocketConnectionsTable,
-            Key={
-                'ConnectionId': {
-                    'S': connectionId
-                }
+        match = re.fullmatch(r'^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$', context['connectionId'])
+        if match:
+            return {
+              'Username': {'S': match.group(1)},
+              'Groups': {'S': json.dumps(match.group(2).split(','))}
             }
-        )
-        if 'Item' not in connectionResponse.keys():
-            raise Exception(f'No Connection was found for Connection Id {connectionId}')
-        connection: IWebSocketConnection = connectionResponse['Item']
-        username = connection['Username']['S']
-        userResponse = dynamo.get_item(
-            TableName=WebSocketUsersTable,
-            Key={
-                'Username': {
-                    'S': username
+        else:
+            connectionId = context['connectionId']
+            connectionResponse: Dict[str, Any] = dynamo.get_item(
+                TableName=WebSocketConnectionsTable,
+                Key={
+                    'ConnectionId': {
+                        'S': connectionId
+                    }
                 }
-            }
-        )
-        if 'Item' not in userResponse.keys():
-            raise Exception(f'No user was found for User Id {username} via Connection Id ${connectionId}')
-        return userResponse['Item']
+            )
+            if 'Item' not in connectionResponse.keys():
+                raise Exception(f'No Connection was found for Connection Id {connectionId}')
+            connection: IWebSocketConnection = connectionResponse['Item']
+            username = connection['Username']['S']
+            userResponse = dynamo.get_item(
+                TableName=WebSocketUsersTable,
+                Key={
+                    'Username': {
+                        'S': username
+                    }
+                }
+            )
+            if 'Item' not in userResponse.keys():
+                raise Exception(f'No user was found for User Id {username} via Connection Id ${connectionId}')
+            return userResponse['Item']
 
     def RespondUnauthorized(self, event: IWebsocketEvent, message: BaseMessage):
         response: BaseMessage = {

@@ -135,4 +135,12 @@ RPC project defines the data contracts and APIs between frontends and backends.
 ```bash
 us aws/rpc [rpc-project-name]
 ```
-in the *uni-rpc.yml* file, the **users** type can be emitted to the "Users" project to update the cloudformation.yml file.
+In the *uni-rpc.yml* file, the **users** type can be emitted to the "Users" project to update the cloudformation.yml file.
+This command also builds the RPC to targets.
+
+### Build RPC Project
+Build the TypeScript files to the targets defined in *uni-rpc.yml* file.
+```bash
+us aws/rpc-build [rpc-project-name]
+```
+This command builds the RPC to targets.

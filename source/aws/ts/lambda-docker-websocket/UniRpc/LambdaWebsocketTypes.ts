@@ -61,3 +61,14 @@ export interface IWebSocketConnection {
     Username: DynamoDB.AttributeValue;
     ConnectTime: DynamoDB.AttributeValue;
 }
+
+export interface LambdaContext {
+    getRemainingTimeInMillis(): number;
+    functionName: string;
+    functionVersion: string;
+    invokedFunctionArn: string;
+    memoryLimitInMB: number;
+    awsRequestId: string;
+    logGroupName: string;
+    logStreamName: string;
+}

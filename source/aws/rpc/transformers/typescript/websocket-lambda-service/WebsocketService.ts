@@ -1,5 +1,5 @@
 import { WebsocketServiceBase } from "./WebsocketServiceBase";
-import { IRequestContext, IWebSocketConnection, IWebsocketEvent, IWebSocketUser } from "./LambdaWebsocketTypes";
+import { IRequestContext, IWebSocketConnection, IWebsocketEvent, IWebSocketUser, LambdaContext } from "./LambdaWebsocketTypes";
 import { BaseMessage } from "./BaseMessage";
 import { GroupClausesAuthorize } from './GroupAuthorizations'
 import { ApiGatewayManagementApi, DynamoDB, Lambda } from 'aws-sdk';
@@ -29,6 +29,13 @@ function findRoute(service: string): string {
   return node;
 }
 
+function parseBody<T>(data: string | T): T {
+  if (typeof data == 'string') {
+    return JSON.parse(data);
+  }
+  return data;
+}
+
 export class WebsocketService {
   tracking: {[serial: string]: any} = {};
   services: Map<string, WebsocketServiceBase> = new Map<string, WebsocketServiceBase>();
@@ -37,6 +44,7 @@ export class WebsocketService {
   groups: string[];
   context: IRequestContext;
   messageId: string;
+  lambdaContext: LambdaContext;
 
   RegisterService<T extends WebsocketServiceBase>(service: T): this {
     service.__websocketService = this;
@@ -58,11 +66,12 @@ export class WebsocketService {
         body: 'Unauthorized'
       };
     }
-    let message: BaseMessage = JSON.parse(event.body);
+    let message: BaseMessage = parseBody<BaseMessage>(event.body);
     console.log(`Input Message: ${event.body}`);
     this.username = this.user.Username.S;
     this.groups = JSON.parse(this.user.Groups.S);
     if (!GroupClausesAuthorize(this.groups, message.Service, message.Method)) {
+      console.error(`Groups "${this.groups.join(', ')}" are allowed to invoke "${message.Service}.${message.Method}"`);
       return {
         statusCode: 401,
         body: 'Unauthorized'
@@ -123,7 +132,7 @@ export class WebsocketService {
     if (match =  /^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$/ig.exec(context.connectionId)) {
         let websocketUser: IWebSocketUser = {
           Username: { S: match[1] },
-          Groups: { S: JSON.stringify(match[1].split(',')) } 
+          Groups: { S: JSON.stringify(match[2].split(',')) } 
         } as any;
         return websocketUser;
     } else {
@@ -157,6 +166,9 @@ export class WebsocketService {
   }
 
   async Respond(context: IRequestContext, data: any): Promise<void> {
+    if (/^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$/ig.test(context.connectionId)) {
+      return;
+    }
     let agm = new ApiGatewayManagementApi({
         endpoint: `${context.domainName}/${context.stage}`
     });
@@ -171,11 +183,15 @@ export class WebsocketService {
     let functionName: string = findRoute(message.Service);
     message.Id = this.messageId;
     message.InvokeType = invokeType;
+    let context: IRequestContext = JSON.parse(JSON.stringify(this.context));
+    if (invokeType == 'Event') {
+      context.connectionId = `$INVOKE-AS:${this.username}@[${this.groups.join(',')}]`;
+    }
     let response = await (lambda.invoke({
       FunctionName: `${UniRpcApplication}--${functionName}--${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
       Payload: JSON.stringify({
-        requestContext: this.context,
+        requestContext: context,
         body: JSON.stringify(message)
       })
     }).promise());
@@ -190,11 +206,15 @@ export class WebsocketService {
     let functionName: string = findRoute(message.Service);
     message.Id = this.messageId;
     message.InvokeType = invokeType;
+    let context: IRequestContext = JSON.parse(JSON.stringify(this.context));
+    if (invokeType == 'Event') {
+      context.connectionId = `$INVOKE-AS:${this.username}@[${this.groups.join(',')}]`;
+    }
     let response = await (lambda.invoke({
       FunctionName: `${UniRpcApplication}--${functionName}--${UniRpcEnvironmentTarget}`,
       InvocationType: invokeType,
       Payload: JSON.stringify({
-        requestContext: this.context,
+        requestContext: context,
         body: JSON.stringify(message)
       })
     }).promise());

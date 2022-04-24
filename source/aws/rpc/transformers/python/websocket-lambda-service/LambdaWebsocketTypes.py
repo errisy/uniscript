@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TypedDict, Dict, List, Any
 from enum import Enum
 
@@ -33,6 +33,7 @@ class IRequestContext(TypedDict):
     identity: IIdentity
     connectionId: str
     apiId: str
+    debug: bool
 
 
 class IBodyBase(TypedDict):
@@ -86,3 +87,38 @@ class IWebSocketConnection(TypedDict):
     ConnectionId: IAttributeValue
     Username: IAttributeValue
     ConnectTime: IAttributeValue
+
+
+class LambdaContext(ABC):
+
+    @abstractmethod
+    def get_remaining_time_in_millis(self) -> float:
+        pass
+
+    @property
+    def function_name(self) -> str:
+        pass
+
+    @property
+    def function_version(self) -> str:
+        pass
+
+    @property
+    def invoked_function_arn(self) -> str:
+        pass
+
+    @property
+    def memory_limit_in_mb(self) -> int:
+        pass
+
+    @property
+    def aws_request_id(self) -> str:
+        pass
+
+    @property
+    def log_group_name(self) -> str:
+        pass
+
+    @property
+    def log_stream_name(self) -> str:
+        pass

@@ -11,6 +11,7 @@ export class MessageProperty {
 
 export class Reflection {
     Name: string;
+    Base?: string;
     Properties: MessageProperty[];
     GenericArguments: string[];
 }
@@ -21,6 +22,64 @@ export class ReflectionsBase {
 
     Register(reflection: Reflection) {
         this.Messages.set(reflection.Name, reflection);
+    }
+
+    AsType<T>(value: T, __Class: { new(): T }): T {
+        let typeInstance: T = (new __Class() as any);
+        if (!('__reflection' in typeInstance)) {
+            throw new Error(`The Provided Class ${String(__Class)} does not have "__reflection" field.`);
+        }
+        let __reflection = (new __Class() as any)['__reflection'] as string;
+        this.ApplyType(value, __reflection);
+        return value;
+    }
+
+    ApplyType<T>(value: T, __reflection: string): T {
+        let reflectionType = this.ParseReflection(__reflection) as ReflectionType;
+        switch (reflectionType.Name) {
+            case 'undefined':
+            case 'boolean':
+            case 'string':
+            case 'float':
+            case 'double':
+            case 'integer':
+            case 'long':
+            case 'bytes':
+                break;
+            case 'Array': 
+            case 'List':
+                let valueIsArray = Array.isArray(value);
+                if (Array.isArray(value)) {
+                    let valueArray = value as any as any[];
+                    for (let i = 0; i < valueArray.length; ++i) {
+                        this.ApplyType(valueArray[i], reflectionType.GenericArguments[0].Fullname);
+                    }
+                }
+                break;
+            case 'Dict':
+                let valueDict: {[key: string]: any} = value as any;
+                if (valueDict) {
+                    for (let key in valueDict) {
+                        this.ApplyType(valueDict[key], reflectionType.GenericArguments[1].Fullname);
+                    }
+                }
+                break;
+            default:
+                if (!this.Messages.has(reflectionType.Name)) {
+                    console.log('this.Messages => \n', this.Messages);
+                    throw new Error(`Type "${reflectionType.Name}" is not registered in Reflections.Messages.`);
+                }
+                let reflection = this.Messages.get(reflectionType.Name) as Reflection;
+                // The following check may not be useful:
+                if (typeof value == undefined || value == null) {
+                    (value as any)['__reflection'] = reflectionType.Name;
+                    for (let property of reflection.Properties) {
+                        this.ApplyType((value as any)[property.Name], property.Type);
+                    }
+                }
+                break;
+        }
+        return value;
     }
 
     Compare<T>(a: T, b: T): boolean {
@@ -105,7 +164,6 @@ export class ReflectionsBase {
                     throw new Error(message.join(' '));
                 }
             case 'Dict':
-                let result: T = {} as any;
                 let aDict: {[key: string]: any} = a as any, bDict: {[key: string]: any} = b as any;
                 let compared: Set<string> = new Set();
                 for (let key in aDict) {
@@ -132,9 +190,12 @@ export class ReflectionsBase {
                     throw new Error(message.join(' '));
                 } else {
                     let reflection = this.Messages.get(reflectionType.Name) as Reflection;
-                    for (let property of reflection.Properties) {
-                        if (!this.CompareType((a as any)[property.Name], (b as any)[property.Name], property.Type)) return false;
-                    }
+                    do {
+                        for (let property of reflection.Properties) {
+                            if (!this.CompareType((a as any)[property.Name], (b as any)[property.Name], property.Type)) return false;
+                        }
+                        reflection = this.Messages.get(reflection.Base as string) as Reflection;
+                    } while (reflection);
                     return true;
                 }
         }
@@ -185,13 +246,16 @@ export class ReflectionsBase {
         let instance: T = {
             '__reflection': __reflection
         } as any;
-        for (let property of reflection.Properties) {
-            if (genericTypeMappings.has(property.Type)) {
-                (instance as any)[property.Name] = this.NewProperty(genericTypeMappings.get(property.Type) as string);
-            } else {
-                (instance as any)[property.Name] = this.NewProperty(property.Type);
+        do {
+            for (let property of reflection.Properties) {
+                if (genericTypeMappings.has(property.Type)) {
+                    (instance as any)[property.Name] = this.NewProperty(genericTypeMappings.get(property.Type) as string);
+                } else {
+                    (instance as any)[property.Name] = this.NewProperty(property.Type);
+                }
             }
-        }
+            reflection = this.Messages.get(reflection.Base as string) as Reflection;
+        } while (reflection);
         return instance;
     }
 
@@ -279,9 +343,12 @@ export class ReflectionsBase {
                 let clone: T = {
                     '__reflection': __reflection
                 } as any;
-                for (let property of reflection.Properties) {
-                    (clone as any)[property.Name] = this.CloneType((value as any)[property.Name], property.Type);
-                }
+                do {
+                    for (let property of reflection.Properties) {
+                        (clone as any)[property.Name] = this.CloneType((value as any)[property.Name], property.Type);
+                    }
+                    reflection = this.Messages.get(reflection.Base as string) as Reflection;
+                } while (reflection);
                 return clone;
         }
     }
@@ -321,7 +388,7 @@ export class ReflectionsBase {
     ParseReflection(__reflection: string): ReflectionType | null {
         __reflection = __reflection.replace(/ /ig, '');
         if (__reflection.length == 0) return null;
-        let groups: RegExpExecArray | null = /^(\w+)<([\w<>,]+)>$/ig.exec(__reflection);
+        let groups: RegExpExecArray | null = /^(\w+)<([\w<>,\.]+)>$/ig.exec(__reflection);
         if (groups) {
             return {
                 Name: groups[1],

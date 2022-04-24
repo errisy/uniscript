@@ -2,8 +2,6 @@ import { Injectable } from "@angular/core";
 import { environment } from "src/environments/environment";
 import { LocalStorageService } from "./local-storage.service";
 
-export type UserGroup = 'Administrators' | 'Strategists' | 'InternalStrategists' | 'StrategyAPIEditors' | 'Customers'
-
 interface IJWTHeader {
     kid: string;
     alg: string;
@@ -104,7 +102,7 @@ export class TokenHolder {
         // console.log('expiring time:', new Date(payloadData.auth_time * 1000), ' -> ', new Date(payloadData.exp * 1000));
     }
 
-    hasAnyGroup(...groups: UserGroup[]) {
+    hasAnyGroup(...groups: string[]) {
         for(let group of groups){
             if(this.Groups.includes(group)) return true;
         }

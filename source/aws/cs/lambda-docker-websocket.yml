@@ -45,7 +45,7 @@ script:
   - name: run websocket-lambda.ts
     ts: '@{apiBaseUrl}/websocket-lambda.ts'
   - name: git sync
-    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    cmd: git add @{project} && git commit @{project} -m "Creat Project @{project}" && git pull && git push
     ignoreError: True
   - name: branch name
     cmd: git branch --show-current

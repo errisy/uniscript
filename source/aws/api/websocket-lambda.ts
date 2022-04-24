@@ -21,8 +21,8 @@ function WriteFileSync(filename: string, data: string, encoding?: BufferEncoding
     fs.writeFileSync(filename, data, encoding);
 }
 
-const SectionBegin = '# No Manual Change { websocket-lambda /*';
-const SectionEnd = '# */ websocket-lambda } No Manual Change';
+const SectionBegin = '# No Manual Change { websocket-lambda-integration /*';
+const SectionEnd = '# */ websocket-lambda-integration } No Manual Change';
 
 function EmitUserGroupsAndUsers () {
     let lines: string[] = [];

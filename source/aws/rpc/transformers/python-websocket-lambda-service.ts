@@ -303,6 +303,7 @@ module CodeGeneration {
             this.emitService(builder, indent);
             builder.appendLine(``, indent);
             this.emitLambdaClient(builder, indent);
+            builder.appendLine(``, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -495,6 +496,7 @@ module CodeGeneration {
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
             this.emitMessage(builder, indent);
+            builder.appendLine(``, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -562,6 +564,7 @@ module CodeGeneration {
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
             this.emitServiceInterface(builder, indent);
+            builder.appendLine(``, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -640,6 +643,7 @@ module CodeGeneration {
             let builder: CodeBuilder = new CodeBuilder(importBuilder);
             let indent = 0;
             this.emitMessageInterface(builder, indent);
+            builder.appendLine(``, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }
@@ -698,6 +702,7 @@ module CodeGeneration {
                 this.emitGroupPolicy(builder, indent, group);
             }
             this.emitPolicySets(builder, indent);
+            builder.appendLine(``, indent);
             console.log('Write Code to:', filename);
             WriteFile(filename, builder.build(), 'utf-8');
         }

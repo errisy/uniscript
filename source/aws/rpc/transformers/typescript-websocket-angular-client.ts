@@ -580,6 +580,9 @@ module CodeGeneration {
                 for (let message of instance.Messages.values()) {
                     builder.appendLine(`this.Register({`, indent + 2);
                     builder.appendLine(`Name: '${message.Fullname.join('.')}',`, indent + 3);
+                    if (message.Base && message.Base.Reference) {
+                        builder.appendLine(`Base: '${message.Base.Reference.FullName.join('.')}',`, indent + 3);
+                    }
                     if (message.Properties.length == 0) {
                         builder.appendLine(`Properties: [],`, indent + 3);
                     } else {
@@ -618,7 +621,7 @@ module CodeGeneration {
             if (typeInstance.IsGeneric) {
                 return `${typeInstance.FullName.join('.')}<${typeInstance.GenericArguments.map(genericArgumentType => this.emitReflectionType(genericArgumentType)).join(',')}>`;
             } else {
-                return typeInstance.FullName.join('.');
+                return typeInstance.Reference.FullName.join('.');
             }
         }
     }

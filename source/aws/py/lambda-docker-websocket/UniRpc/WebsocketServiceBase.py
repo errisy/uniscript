@@ -1,4 +1,4 @@
-from typing import List, Coroutine, Any
+from typing import List, Any
 from abc import abstractmethod
 from UniRpc.BaseMessage import BaseMessage
 

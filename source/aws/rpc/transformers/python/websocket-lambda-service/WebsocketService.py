@@ -8,7 +8,7 @@ import traceback
 import re
 
 from UniRpc.WebsocketServiceBase import WebsocketServiceBase
-from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection
+from UniRpc.LambdaWebsocketTypes import IWebSocketUser, IWebsocketEvent, IRequestContext, IWebSocketConnection, LambdaContext
 from UniRpc.BaseMessage import BaseMessage
 from UniRpc.GroupAuthorizations import GroupClausesAuthorize
 from ServiceRelays import __ServiceRelayRoutes
@@ -46,6 +46,7 @@ class WebsocketService:
     groups: List[str]
     context: IRequestContext
     message_id: str
+    lambda_context: LambdaContext
 
     def RegisterService(self, service: WebsocketServiceBase) -> WebsocketService:
         service.WEBSOCKETSERVICEBASE__websocketService = self
@@ -59,8 +60,10 @@ class WebsocketService:
         try:
             self.user = await self.GetUser(event['requestContext'])
         except Exception as exception:
-            print('GetUser failed. Authentication Error.')
             print(exception)
+            print('****** Begin of GetUser Failure (Authentication Error) ******')
+            traceback.print_exc()
+            print('****** Begin of GetUser Failure (Authentication Error) ******')
             return {
                 'statusCode': 401,
                 'body': 'Unauthorized'
@@ -92,13 +95,19 @@ class WebsocketService:
                         'body': 'Accepted'
                     }
             except LogicTerminationException as ex:
+                print(ex)
+                print('****** Begin of Logic Termination ******')
+                print(traceback.print_exc())
+                print('****** End of Logic Termination ******')
                 return {
                     'statusCode': 202,
                     'body': 'Accepted'
                 }
             except Exception as ex:
                 print(ex)
+                print('****** Begin of Error in Execution ******')
                 traceback.print_exc()
+                print('****** End of Error in Execution ******')
                 return {
                     'statusCode': 500,
                     'body': 'Internal Server Error'
@@ -156,6 +165,8 @@ class WebsocketService:
         self.Respond(event['requestContext'], response)
 
     def Respond(self, context: IRequestContext, data: any):
+        if re.fullmatch(r'^\$INVOKE-AS:([\w]+)@\[([\w\.,]+)\]$', context['connectionId']):
+            return
         agm = boto3.client(
             'apigatewaymanagementapi', endpoint_url='https://' + context['domainName'] + '/' + context['stage']
         )
@@ -170,11 +181,16 @@ class WebsocketService:
         function_name: str = find_route(message['Service'])
         message['Id'] = self.message_id
         message['InvokeType'] = invoke_type
+        context: IRequestContext = json.loads(json.dumps(self.context))
+        if invoke_type == 'Event':
+            invoke_user: str = self.username
+            invoke_groups: str = ','.join(self.groups)
+            context['connectionId'] = f'$INVOKE-AS:{invoke_user}@[{invoke_groups}]'
         response = _lambda.invoke(
             FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
             InvocationType=invoke_type,
             Payload=json.dumps({
-                'requestContext': self.context,
+                'requestContext': context,
                 'body': json.dumps(message)
             })
         )
@@ -187,16 +203,24 @@ class WebsocketService:
         function_name: str = find_route(message['Service'])
         message['Id'] = self.message_id
         message['InvokeType'] = invoke_type
+        context: IRequestContext = json.loads(json.dumps(self.context))
+        if invoke_type == 'Event':
+            invoke_user: str = self.username
+            invoke_groups: str = ','.join(self.groups)
+            context['connectionId'] = f'$INVOKE-AS:{invoke_user}@[{invoke_groups}]'
         response = _lambda.invoke(
             FunctionName=f'{UniRpcApplication}--{function_name}--{UniRpcEnvironmentTarget}',
             InvocationType=invoke_type,
             Payload=json.dumps({
-                'requestContext': self.context,
+                'requestContext': context,
                 'body': json.dumps(message)
             })
         )
 
 
 class LogicTerminationException(Exception):
+    message: str
+
     def __init__(self, message: str = ''):
         super().__init__(message)
+        self.message = message

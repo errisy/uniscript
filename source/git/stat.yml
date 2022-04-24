@@ -1,0 +1,11 @@
+script:
+  parameters:
+    arg0$: 'package\-lock\.json$,\.gz$,\.zip$,\.parquet$'
+    excludings$@: '@{arg0}'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/git
+  steps:
+  - name: git sl
+    cmd: git ls-files
+    sh: git ls-files
+  - name: run stat.ts
+    ts: '@{baseUrl}/stat.ts'

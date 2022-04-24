@@ -28,7 +28,7 @@ script:
     bash: cd @{project} ; npm i ; cd ..
     ignoreError: True
   - name: git sync
-    cmd: git add -A && git commit -a -m "Creat Project @{project}" && git pull && git push
+    cmd: git add @{project} && git commit @{project} -m "Creat Project @{project}" && git pull && git push
     ignoreError: True
   - name: branch name
     cmd: git branch --show-current

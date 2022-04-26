@@ -5,7 +5,7 @@
 
 variables:
   # shared variables:
-  Application: 'az-util'
+  Application: '@{applicationName}'
   Version: 1.0.0
   LambdaRuntimeDotNetCore: dotnetcore3.1
   LambdaRuntimeNodeJS: nodejs14.x

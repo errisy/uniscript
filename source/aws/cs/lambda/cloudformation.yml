@@ -57,6 +57,7 @@ Resources:
       Environment:
         Variables:
           UniRpcApplication: !Sub ${Application}
+          UniRpcProject: !Sub ${Project}
           UniRpcEnvironmentTarget: !Sub ${EnvironmentTarget}
 
   # if you want to schedule the lambda by timer

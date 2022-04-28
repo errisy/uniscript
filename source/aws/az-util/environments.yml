@@ -7,7 +7,7 @@ variables:
   # shared variables:
   Application: '@{applicationName}'
   Version: 1.0.0
-  LambdaRuntimeDotNetCore: dotnetcore3.1
+  LambdaRuntimeDotNetCore: dotnet6
   LambdaRuntimeNodeJS: nodejs14.x
   LambdaRuntimePython: python3.9
   

@@ -8,7 +8,7 @@ export interface Target {
     /** List of selected namespaces */
     ns: string[];
     type: 'websocket-service' | 'websocket-client' | 'websocket-angular-client' | 'http-lambda-service' |
-        'websocket-lambda-service' | 'lambda-service' | 'lambda-client' | 'cognito';
+        'websocket-lambda-service' | 'lambda-service' | 'lambda-client' | 'cognito' | 'http-express-service' | 'http-react-client';
     csCode?: string;
     tsCode?: string;
     pyCode?: string;

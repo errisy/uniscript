@@ -10,6 +10,8 @@ import * as CSharpWebsocketService from './csharp-websocket-service';
 import * as CSharpWebsocketLambdaService from './csharp-websocket-lambda-service';
 import * as TypeScriptWebsocketAngularClient from './typescript-websocket-angular-client';
 import * as TypeScriptWebsocketLambdaService from './typescript-websocket-lambda-service';
+import * as TypeScriptHttpExpressService from './typescript-http-express-service';
+import * as TypeScriptHttpReactClient from './typescript-http-react-client';
 import * as PythonWebsocketLambdaService from './python-websocket-lambda-service';
 import * as UserCognito from './users-cognito';
 
@@ -36,6 +38,14 @@ function emitFiles() {
       }
     } else if (typeof target.ts == 'string') {
       switch (target.type) {
+        case 'http-react-client': {
+          let transpiler = new TypeScriptHttpReactClient.Transpiler(resolver);
+          transpiler.emit(target);
+        } break;
+        case 'http-express-service': {
+          let transpiler = new TypeScriptHttpExpressService.Transpiler(resolver);
+          transpiler.emit(target);
+        } break;
         case 'websocket-angular-client': {
           let transpiler = new TypeScriptWebsocketAngularClient.Transpiler(resolver);
           transpiler.emit(target);

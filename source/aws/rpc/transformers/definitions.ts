@@ -1,5 +1,5 @@
 export interface ILocalNameResolver {
-    Reflection: 'SourceFileResovler' | 'Namespace' | 'Service' | 'Message' | 'ServiceInterface' | 'MessageInterface' | 'Method' | 'Property' | 'Argument' | 'Type';
+    Reflection: 'SourceFileResovler' | 'Namespace' | 'Service' | 'Message' | 'ServiceInterface' | 'MessageInterface' | 'Method' | 'Property' | 'Argument' | 'Type' | 'Enum';
     Parent: ILocalNameResolver;
     resolve(fullname: string[]): Type;
     build(parent: ILocalNameResolver): void;
@@ -17,7 +17,8 @@ export class Namespace implements ILocalNameResolver{
     Services: Service[] = [];
     MessageInterfaces: MessageInterface[] = [];
     ServiceInterfaces: ServiceInterface[] = [];
-    Children: Map<string, Namespace | Message | Service | MessageInterface | ServiceInterface | Type> = new Map();
+    Enums: Enum[] = [];
+    Children: Map<string, Namespace | Message | Service | MessageInterface | ServiceInterface | Type | Enum> = new Map();
     Parent: ILocalNameResolver;
     get NamespaceName(): string {
         return this.Fullname.join('.');
@@ -138,15 +139,24 @@ export class Namespace implements ILocalNameResolver{
         this.Children.set(name, message);
         return message;
     }
+    addEnum(nsName: string[], name: string): Enum {
+        let enumInstance = new Enum();
+        enumInstance.Namespace = nsName;
+        enumInstance.Name = name;
+        enumInstance.Fullname = [...nsName, name];
+        this.Enums.push(enumInstance);
+        this.Children.set(name, enumInstance);
+        return enumInstance;
+    }
 }
 
-export class Enum {
-    Name: string;
-    Namespace: string[];
-    Fullname: string[];
-    Members: string[];
-    Type: Type;
-}
+// export class Enum {
+//     Name: string;
+//     Namespace: string[];
+//     Fullname: string[];
+//     Members: string[];
+//     Type: Type;
+// }
 
 export class Message implements ILocalNameResolver {
     Base: Type;
@@ -516,6 +526,24 @@ export class Type implements ILocalNameResolver{
             
         }
     }
+}
+
+export class Enum implements ILocalNameResolver {
+    Reflection: 'Enum' = 'Enum';
+    Namespace: string[];
+    Name: string;
+    Fullname: string[];
+    Parent: ILocalNameResolver;
+    Fields: Map<string, string | number> = new Map();
+    resolve(fullname: string[]): Type {
+        return this.Parent.resolve(fullname);
+    }
+    build(parent: ILocalNameResolver): void {
+        this.Parent = parent;
+    }
+    link(): void {
+    }
+    
 }
 
 export const BooleanType = new Type('boolean', 'boolean');

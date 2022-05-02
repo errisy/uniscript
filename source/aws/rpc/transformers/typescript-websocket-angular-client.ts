@@ -1,4 +1,4 @@
-import { Namespace, Service, Message, Method, Property, Parameter, Type, VoidType, ServiceInterface, MessageInterface } from './definitions';
+import { Namespace, Service, Message, Method, Property, Parameter, Type, VoidType, ServiceInterface, MessageInterface, Enum } from './definitions';
 import { SourceFileResovler } from './resolvers';
 import { RPC, Target } from './rpc-configuration';
 import { CodeBuilder } from './code-builder';
@@ -157,15 +157,17 @@ module CodeGeneration {
     export function AsEmitter(instance: Message): MessageEmitter;
     export function AsEmitter(instance: ServiceInterface): ServiceInterfaceEmitter;
     export function AsEmitter(instance: MessageInterface): MessageInterfaceEmitter;
+    export function AsEmitter(instance: Enum): EnumEmitter;
     export function AsEmitter(
-        instance: Namespace | Service | Message | ServiceInterface | MessageInterface): 
-        NamespaceEmitter | ServiceEmitter | MessageEmitter | ServiceInterfaceEmitter | MessageInterfaceEmitter  {
+        instance: Namespace | Service | Message | ServiceInterface | MessageInterface | Enum): 
+        NamespaceEmitter | ServiceEmitter | MessageEmitter | ServiceInterfaceEmitter | MessageInterfaceEmitter | EnumEmitter {
         switch (instance.Reflection) {
             case 'Namespace': return new NamespaceEmitter(instance as Namespace);
             case 'Service': return new ServiceEmitter(instance as Service);
             case 'Message': return new MessageEmitter(instance as Message);
             case 'ServiceInterface': return new ServiceInterfaceEmitter(instance as ServiceInterface);
             case 'MessageInterface': return new MessageInterfaceEmitter(instance as MessageInterface);
+            case 'Enum': return new EnumEmitter(instance as Enum);
         }
         console.error('No available Emitter for:', instance);
         throw `Emitter is not available for instance of "${typeof instance}"`;
@@ -260,6 +262,10 @@ module CodeGeneration {
                     } break;
                     case 'ServiceInterface': {
                         let instance = child as ServiceInterface;
+                        CodeGeneration.AsEmitter(instance).emitFile(rootDirectory);
+                    } break;
+                    case 'Enum': {
+                        let instance = child as Enum;
                         CodeGeneration.AsEmitter(instance).emitFile(rootDirectory);
                     } break;
                 }
@@ -562,6 +568,35 @@ module CodeGeneration {
         }
     }
 
+    class EnumEmitter {
+        constructor(private instance: Enum) {}
+        emitFile(rootDirectory: string) {
+            let filename = path.join(rootDirectory, ...this.instance.Namespace, this.instance.Name + '.ts');
+            let builder: CodeBuilder = new CodeBuilder(importBuilder);
+            let indent = 0;
+            this.emitEnum(builder, indent);
+            console.log('Write Code to:', filename);
+            WriteFile(filename, builder.build(), 'utf-8');
+        }
+        emitEnum(builder: CodeBuilder, indent: number) {
+            builder.appendLine(`export enum ${this.instance.Name} {`, indent);
+            let size = this.instance.Fields.size;
+            let index = 0;
+            for (let name of this.instance.Fields.keys()) {
+                ++index;
+                let delimiter = index == size ? '' : ',';
+                let value = this.instance.Fields.get(name);
+                if (typeof value == 'string') {
+                    builder.appendLine(`${name} = '${value}'${delimiter}`, indent + 1);
+                } else if (typeof value == 'number') {
+                    builder.appendLine(`${name} = ${value}${delimiter}`, indent + 1);
+                }
+            }
+            builder.appendLine(`}`, indent);
+            builder.appendLine('', indent);
+        }
+    }
+
     export class ReflectionsEmitter {
         constructor (private namsespaces: Map<string, Namespace>) {}
         emitFile(rootDirectory: string) {
@@ -717,4 +752,6 @@ module CodeGeneration {
             builder.appendLine(`};`, indent)
         }
     }
+
+
 }

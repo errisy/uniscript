@@ -57,6 +57,19 @@ script:
       - transformers/translate.ts
       - transformers/tsconfig.json
       - transformers/types.d.ts
+      - transformers/typescript/http-express-service/BaseMessage.ts
+      - transformers/typescript/http-express-service/GroupAuthorizations.ts
+      - transformers/typescript/http-express-service/LambdaWebsocketTypes.ts
+      - transformers/typescript/http-express-service/ReturnMessage.ts
+      - transformers/typescript/http-express-service/HttpService.ts
+      - transformers/typescript/http-express-service/HttpServiceBase.ts
+      - transformers/typescript/http-react-client/BaseMessage.ts
+      - transformers/typescript/http-react-client/GroupAuthorizations.ts
+      - transformers/typescript/http-react-client/local-storage.service.ts
+      - transformers/typescript/http-react-client/token-holder.service.ts
+      - transformers/typescript/http-react-client/ReflectionsBase.ts
+      - transformers/typescript/http-react-client/HttpService.ts
+      - transformers/typescript/http-react-client/HttpServiceBase.ts
       - transformers/typescript/websocket-angular-client/BaseMessage.ts
       - transformers/typescript/websocket-angular-client/GroupAuthorizations.ts
       - transformers/typescript/websocket-angular-client/local-storage.service.ts
@@ -70,6 +83,8 @@ script:
       - transformers/typescript/websocket-lambda-service/ReturnMessage.ts
       - transformers/typescript/websocket-lambda-service/WebsocketService.ts
       - transformers/typescript/websocket-lambda-service/WebsocketServiceBase.ts
+      - transformers/typescript-http-express-service.ts
+      - transformers/typescript-http-react-client.ts
       - transformers/typescript-websocket-angular-client.ts
       - transformers/typescript-websocket-lambda-service.ts
       # - transformers/uni-rpc.json

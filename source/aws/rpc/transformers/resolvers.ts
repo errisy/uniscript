@@ -160,10 +160,24 @@ export class SourceFileResovler implements ILocalNameResolver {
     }
 
     private resolveEnumType(token: ts.EnumDeclaration) {
-        let enumInstance = new Enum();
-        let name: string = token.symbol.escapedName.toString();
+        let name = resolveName(token.name as any);
+        let nsName = this.buildCurrentNamespaceFullname();
+        let enumInstance = this.currentNamespace.addEnum(nsName, name);
         for (let member of token.members) {
-            
+            let name = member.name.getText();
+            if (member.initializer) {
+                let initializer = member.initializer;
+                switch (initializer.kind) {
+                    case ts.SyntaxKind.StringLiteral:
+                        enumInstance.Fields.set(name, initializer.getText().replace(/^['"`]/ig, '').replace(/['"`]$/ig, ''));
+                        break;
+                    case ts.SyntaxKind.NumericLiteral:
+                        enumInstance.Fields.set(name, Number(initializer.getText()));
+                        break;
+                }
+            } else {
+                enumInstance.Fields.set(name, name);
+            }
         }
     }
 

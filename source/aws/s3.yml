@@ -1,15 +1,9 @@
 script:
   parameters:
     AzDevEnv+: az-dev-env.yml
-    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/users/
-    arg0$: 'users'
-    arg1$: 'users-test@some-email.com'
-    arg2$: '+16665554321'
-    arg3$: 'http://localhost:4200'
+    baseUrl$: https://raw.githubusercontent.com/errisy/uniscript/main/source/aws/s3/
+    arg0$: 'persistence'
     project$@: '@{arg0}'
-    primaryEmail$@: '@{arg1}'
-    primaryPhone$@: '@{arg2}'
-    localRedirectUrl$@: '@{arg3}'
   steps:
   - name: Make The Project Directory
     mkdir: '@{project}'

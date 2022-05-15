@@ -19,8 +19,8 @@ Parameters:
     Type: String
 
 Resources:
-  UserDataS3Bucket:
+  DataS3Bucket:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Retain
     Properties:
-      BucketName: ${AWSAccountId}--${AWSRegion}--${Application}--user-data--${EnvironmentTarget}
+      BucketName: !Sub ${AWSAccountId}--${AWSRegion}--${Application}--user-data--${EnvironmentTarget}

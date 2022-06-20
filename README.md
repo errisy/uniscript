@@ -93,6 +93,13 @@ us aws/cs/lambda [project-name]
 ```bash
 us aws/cs/lambda-docker [project-name]
 ```
+
+## AWS Storage
+### S3
+```bash
+us aws/s3 [project-name]
+```
+
 ## AWS CloudFront
 ### Angular
 This requires [@angular/cli](https://www.npmjs.com/package/@angular/cli)

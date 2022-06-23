@@ -51,7 +51,7 @@ Resources:
     # Add Layers Here
       # Layers:
       #   - Fn::Transform:
-      #       Name : cloudformation-utils
+      #       Name : !Sub ${AzureUtil}--cloudformation-utils
       #       Parameters:
       #         InputString: !Sub 'ProjectLayer@${Application}--[project-name]--${AWSRegion}--${EnvironmentTarget}'
       #         Operation: Stack
